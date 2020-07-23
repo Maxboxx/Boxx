@@ -690,8 +690,8 @@ namespace Boxx {
 				else
 					data.Write<UByte>(repeatColors.Size(), Endian::Big);
 
-				UShort x = transpose ? pos / pixel.width : pos % pixel.width;
-				UShort y = transpose ? pos % pixel.width : pos / pixel.width;
+				UShort x = transpose ? pos / pixel.height : pos % pixel.width;
+				UShort y = transpose ? pos % pixel.height : pos / pixel.width;
 
 				if (doubleSize) {
 					data.Write<UShort>(x, Endian::Big);
