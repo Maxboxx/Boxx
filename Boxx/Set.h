@@ -167,7 +167,7 @@ namespace Boxx {
 	template <class T>
 	Collection<Set<T>> Set<T>::Combinations(const UInt numElements) const {
 		Collection<Set<T>> combinations;
-		Array<Bool> used = Array<Bool>(Size());
+		Array<bool> used = Array<bool>(Size());
 
 		for (UInt i = 0; i < used.Size(); i++)
 			used[i] = false;
