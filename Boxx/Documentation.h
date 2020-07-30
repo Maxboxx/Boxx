@@ -45,6 +45,8 @@ namespace Boxx {
 			char commentType = ' ';
 			String content;
 			List<DocComment> subcomments;
+
+			~DocComment() {}
 		};
 
 		static List<DocSection> ParseComments(const List<DocComment>& comments, UInt& index, const bool isBlock = false);
@@ -76,6 +78,8 @@ namespace Boxx {
 		///T Documentation comment
 		/// The start of a documentation comment
 		String docComment = "///";
+
+		~DocInfo() {}
 	};
 
 	///B DocSection
@@ -100,6 +104,8 @@ namespace Boxx {
 		///T Subsections
 		/// A list of all subsections to the documentation section
 		List<DocSection> sections;
+
+		~DocSection() {}
 	};
 	
 	inline Documentation::Documentation() {

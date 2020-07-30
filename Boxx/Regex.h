@@ -180,11 +180,15 @@ namespace Boxx {
 			Stack<GroupValues> groupStack;
 			Stack<Pointer<QuantifierValues>> quantifierStack;
 			Stack<Pointer<Pattern>> choiceStack;
+
+			~PatternInfo() {}
 		};
 
 		struct Pattern {
 			Pointer<Pattern> next = nullptr;
 			bool pastEnd = false;
+
+			~Pattern() {}
 
 			virtual const char* Match(const char* str, List<String>& matches, PatternInfo& info) {
 				const char* c = Next(str, matches, info);
@@ -221,10 +225,13 @@ namespace Boxx {
 			Pointer<Pattern> next;
 			UInt match{};
 			UInt group{};
+
+			~GroupValues() {}
 		};
 
 		struct GroupPattern : public Pattern {
 			GroupPattern() {pastEnd = true;}
+			~GroupPattern() {}
 
 			bool hidden = false;
 			bool elementMatch = false;
@@ -265,6 +272,7 @@ namespace Boxx {
 
 		struct GroupEndPattern : public Pattern {
 			GroupEndPattern() {pastEnd = true;}
+			~GroupEndPattern() {}
 
 			virtual const char* Match(const char* str, List<String>& matches, PatternInfo& info) override {
 				GroupValues values = info.groupStack.Peek();
@@ -298,6 +306,7 @@ namespace Boxx {
 
 		struct ElementMatchPattern : public Pattern {
 			ElementMatchPattern() {pastEnd = true;}
+			~ElementMatchPattern() {}
 
 			UInt num = 0;
 
@@ -321,18 +330,24 @@ namespace Boxx {
 		};
 
 		struct AnyPattern : public Pattern {
+			~AnyPattern() {}
+
 			virtual const char* Match(const char* str, List<String>& matches, PatternInfo& info) override {
 				return Next(str + 1, matches, info);
 			}
 		};
 
 		struct SkipPattern : public Pattern {
+			~SkipPattern() {}
+
 			virtual const char* Match(const char* str, List<String>& matches, PatternInfo& info) override {
 				return Next(str, matches, info);
 			}
 		};
 
 		struct StartPattern : public Pattern {
+			~StartPattern() {}
+
 			virtual const char* Match(const char* str, List<String>& matches, PatternInfo& info) override {
 				if (str == info.first)
 					return Next(str, matches, info);
@@ -342,6 +357,7 @@ namespace Boxx {
 
 		struct EndPattern : public Pattern {
 			EndPattern() {pastEnd = true;}
+			~EndPattern() {}
 
 			virtual const char* Match(const char* str, List<String>& matches, PatternInfo& info) override {
 				if (str == info.last)
@@ -351,6 +367,8 @@ namespace Boxx {
 		};
 
 		struct InversePattern : public Pattern {
+			~InversePattern() {}
+
 			Pointer<Pattern> content;
 
 			virtual const char* Match(const char* str, List<String>& matches, PatternInfo& info) override {
@@ -361,6 +379,8 @@ namespace Boxx {
 		};
 
 		struct CharPattern : public Pattern {
+			~CharPattern() {}
+
 			char c{};
 
 			virtual const char* Match(const char* str, List<String>& matches, PatternInfo& info) override {
@@ -371,6 +391,8 @@ namespace Boxx {
 		};
 
 		struct PunctuationPattern : public Pattern {
+			~PunctuationPattern() {}
+
 			virtual const char* Match(const char* str, List<String>& matches, PatternInfo& info) override {
 				if (Punctuation(*str))
 					return Next(str + 1, matches, info);
@@ -379,6 +401,8 @@ namespace Boxx {
 		};
 
 		struct WordPattern : public Pattern {
+			~WordPattern() {}
+
 			virtual const char* Match(const char* str, List<String>& matches, PatternInfo& info) override {
 				if (Word(*str))
 					return Next(str + 1, matches, info);
@@ -387,6 +411,8 @@ namespace Boxx {
 		};
 
 		struct AlphaNumericPattern : public Pattern {
+			~AlphaNumericPattern() {}
+
 			virtual const char* Match(const char* str, List<String>& matches, PatternInfo& info) override {
 				if (AlphaNumeric(*str))
 					return Next(str + 1, matches, info);
@@ -395,6 +421,8 @@ namespace Boxx {
 		};
 
 		struct AlphaPattern : public Pattern {
+			~AlphaPattern() {}
+
 			virtual const char* Match(const char* str, List<String>& matches, PatternInfo& info) override {
 				if (Alpha(*str))
 					return Next(str + 1, matches, info);
@@ -403,6 +431,8 @@ namespace Boxx {
 		};
 
 		struct LowerPattern : public Pattern {
+			~LowerPattern() {}
+
 			virtual const char* Match(const char* str, List<String>& matches, PatternInfo& info) override {
 				if (Lower(*str))
 					return Next(str + 1, matches, info);
@@ -411,6 +441,8 @@ namespace Boxx {
 		};
 
 		struct UpperPattern : public Pattern {
+			~UpperPattern() {}
+
 			virtual const char* Match(const char* str, List<String>& matches, PatternInfo& info) override {
 				if (Upper(*str))
 					return Next(str + 1, matches, info);
@@ -419,6 +451,8 @@ namespace Boxx {
 		};
 
 		struct NumericPattern : public Pattern {
+			~NumericPattern() {}
+
 			virtual const char* Match(const char* str, List<String>& matches, PatternInfo& info) override {
 				if (Numeric(*str))
 					return Next(str + 1, matches, info);
@@ -427,6 +461,8 @@ namespace Boxx {
 		};
 
 		struct HexPattern : public Pattern {
+			~HexPattern() {}
+
 			virtual const char* Match(const char* str, List<String>& matches, PatternInfo& info) override {
 				if (Numeric(*str) || (*str >= 'a' && *str <= 'f') || (*str >= 'A' && *str <= 'F'))
 					return Next(str + 1, matches, info);
@@ -435,6 +471,8 @@ namespace Boxx {
 		};
 
 		struct SpacePattern : public Pattern {
+			~SpacePattern() {}
+
 			virtual const char* Match(const char* str, List<String>& matches, PatternInfo& info) override {
 				if (Space(*str))
 					return Next(str + 1, matches, info);
@@ -443,6 +481,8 @@ namespace Boxx {
 		};
 
 		struct WhiteSpacePattern : public Pattern {
+			~WhiteSpacePattern() {}
+
 			virtual const char* Match(const char* str, List<String>& matches, PatternInfo& info) override {
 				if (WhiteSpace(*str))
 					return Next(str + 1, matches, info);
@@ -452,6 +492,7 @@ namespace Boxx {
 
 		struct BoundaryPattern : public Pattern {
 			BoundaryPattern() {pastEnd = true;}
+			~BoundaryPattern() {}
 
 			virtual const char* Match(const char* str, List<String>& matches, PatternInfo& info) override {
 				if (str >= info.last || str - 1 <= info.first) return Next(str, matches, info);
@@ -462,6 +503,8 @@ namespace Boxx {
 		};
 
 		struct RangePattern : public Pattern {
+			~RangePattern() {}
+
 			char c1{}, c2{};
 
 			virtual const char* Match(const char* str, List<String>& matches, PatternInfo& info) override {
@@ -472,6 +515,8 @@ namespace Boxx {
 		};
 
 		struct CharSetPattern : public Pattern {
+			~CharSetPattern() {}
+
 			Array<Pointer<Pattern>> patterns;
 
 			virtual const char* Match(const char* str, List<String>& matches, PatternInfo& info) override {
@@ -491,6 +536,7 @@ namespace Boxx {
 
 		struct ChoicePattern : public Pattern {
 			ChoicePattern() {pastEnd = true;}
+			~ChoicePattern() {}
 
 			Array<Pointer<Pattern>> patterns;
 
@@ -517,6 +563,7 @@ namespace Boxx {
 
 		struct ChoiceEndPattern : public Pattern {
 			ChoiceEndPattern() {pastEnd = true;}
+			~ChoiceEndPattern() {}
 
 			virtual const char* Match(const char* str, List<String>& matches, PatternInfo& info) override {
 				Pointer<Pattern> next = info.choiceStack.Pop();
@@ -537,10 +584,13 @@ namespace Boxx {
 			bool many{};
 			Pointer<Pattern> next;
 			Pointer<Pattern> content;
+
+			~QuantifierValues() {}
 		};
 
 		struct QuantifierPattern : public Pattern {
 			QuantifierPattern() {pastEnd = true;}
+			~QuantifierPattern() {}
 
 			UInt min = Math::UIntMin();
 			UInt max = Math::UIntMax();
@@ -590,6 +640,7 @@ namespace Boxx {
 
 		struct QuantifierEndPattern : public Pattern {
 			QuantifierEndPattern() {pastEnd = true;}
+			~QuantifierEndPattern() {}
 
 			virtual const char* Match(const char* str, List<String>& matches, PatternInfo& info) override {
 				Pointer<QuantifierValues> values = info.quantifierStack.Peek();

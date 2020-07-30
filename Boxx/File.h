@@ -12,6 +12,19 @@
 
 ///N File
 namespace Boxx {
+
+	///B FileMode
+	/// Bit flags for the different modes of opening a file
+	enum class FileMode : UByte {
+		///T Values
+		///M
+		None = 0,
+		Binary = 1
+		///M
+	};
+
+	BOXX_ENUM_FLAGS(FileMode);
+
 	///B FileReader
 	/// Used to read the contents of a file
 	class FileReader {
@@ -24,7 +37,7 @@ namespace Boxx {
 		///T Open file
 		/// Opens a file for reading
 		///E FileNotFoundError: Thrown if the file was not found
-		explicit FileReader(const char* const filename);
+		explicit FileReader(const char* const filename, const FileMode mode = FileMode::None);
 
 		FileReader(const FileReader& file);
 		FileReader(FileReader&& file) noexcept;
@@ -65,6 +78,7 @@ namespace Boxx {
 		public:
 			LineIterator();
 			LineIterator(FileReader* const file);
+			~LineIterator() {}
 
 			String operator*();
 			LineIterator operator++();
@@ -101,7 +115,7 @@ namespace Boxx {
 		///T Open file
 		/// Opens a file for writing
 		///E FileOpenError: Thrown if the file can not be opened
-		explicit FileWriter(const char* const filename);
+		explicit FileWriter(const char* const filename, const FileMode mode = FileMode::None);
 
 		FileWriter(const FileWriter& file);
 		FileWriter(FileWriter&& file) noexcept;
@@ -177,8 +191,11 @@ namespace Boxx {
 
 	}
 
-	inline FileReader::FileReader(const char* const filename) {
-		file = new std::ifstream(filename, std::fstream::binary);
+	inline FileReader::FileReader(const char* const filename, const FileMode mode) {
+		if ((mode & FileMode::Binary) != FileMode::None)
+			file = new std::ifstream(filename, std::fstream::binary);
+		else
+			file = new std::ifstream(filename);
 
 		if (!file->is_open()) {
 			throw FileNotFoundError("Could not find file: " + String(filename));
@@ -301,8 +318,11 @@ namespace Boxx {
 
 	}
 
-	inline FileWriter::FileWriter(const char* const filename) {
-		file = new std::ofstream(filename, std::fstream::binary);
+	inline FileWriter::FileWriter(const char* const filename, const FileMode mode) {
+		if ((mode & FileMode::Binary) != FileMode::None)
+			file = new std::ofstream(filename, std::fstream::binary);
+		else
+			file = new std::ofstream(filename);
 
 		if (!file->is_open()) {
 			throw FileOpenError("Could not open file: " + String(filename));

@@ -12,6 +12,7 @@
 #include "Map.h"
 #include "Optional.h"
 #include "Collection.h"
+#include "Tuple.h"
 
 ///N Pixel
 
@@ -129,7 +130,7 @@ namespace Boxx {
 		static UByte GetBitCount2(const UShort number);
 		static Set<Format> GetAllFormats();
 
-		Pair<List<ColorRGBA>, Array<UShort>> GetColorIDs() const;
+		Tuple<List<ColorRGBA>, Array<UShort>> GetColorIDs() const;
 	};
 
 	BOXX_ENUM_FLAGS(Pixel::Format);
@@ -230,7 +231,7 @@ namespace Boxx {
 		FileReader file;
 		
 		try {
-			file = FileReader(filename);
+			file = FileReader(filename, FileMode::Binary);
 		}
 		catch (FileNotFoundError e) {
 			throw e;
@@ -821,12 +822,12 @@ namespace Boxx {
 		Format bestFormat = Format::None;
 		Set<Format> formats = GetAllFormats();
 
-		Pair<List<ColorRGBA>, Array<UShort>> colors = pixel.GetColorIDs();
+		Tuple<List<ColorRGBA>, Array<UShort>> colors = pixel.GetColorIDs();
 		Pixel transposePixel = Pixel(pixel.height, pixel.width, pixel.pixels);
-		Array<UShort> transposeIDs = Array<UShort>(colors.value.Size());
+		Array<UShort> transposeIDs = Array<UShort>(colors.value2.Size());
 
 		if (format.HasValue()) {
-			if (colors.key.Size() > Math::UByteMax()) {
+			if (colors.value1.Size() > Math::UByteMax()) {
 				if ((format.Get() & Format::DoubleBytes) == Format::None) {
 					throw PixelEncodeError("Format should have double bytes for images with more than 256 colors");
 				}
@@ -835,7 +836,7 @@ namespace Boxx {
 
 		for (UInt x = 0; x < pixel.width; x++)
 			for (UInt y = 0; y < pixel.height; y++)
-				transposeIDs[y + x * pixel.height] = colors.value[x + y * pixel.width];
+				transposeIDs[y + x * pixel.height] = colors.value2[x + y * pixel.width];
 
 		if (!format) {
 			for (Format format : formats) {
@@ -846,20 +847,20 @@ namespace Boxx {
 				}
 
 				if ((format & Format::DoubleBytes) == Format::None) {
-					if (colors.key.Size() > Math::UByteMax()) {
+					if (colors.value1.Size() > Math::UByteMax()) {
 						continue;
 					}
 				}
 
 				Buffer formatData = Buffer(pixel.pixels.Size());
 
-				EncodeHeader(colors.key, pixel, formatData, format);
+				EncodeHeader(colors.value1, pixel, formatData, format);
 
 				if ((format & Format::Transpose) != Format::None) {
-					EncodePixels(pixel, colors.key, transposeIDs, formatData, format);
+					EncodePixels(pixel, colors.value1, transposeIDs, formatData, format);
 				}
 				else {
-					EncodePixels(pixel, colors.key, colors.value, formatData, format);
+					EncodePixels(pixel, colors.value1, colors.value2, formatData, format);
 				}
 
 				if (formatData.Size() < data.Size() || data.Size() == 0) {
@@ -871,13 +872,13 @@ namespace Boxx {
 		else {
 			Buffer formatData = Buffer(pixel.pixels.Size());
 
-			EncodeHeader(colors.key, pixel, formatData, format.Get());
+			EncodeHeader(colors.value1, pixel, formatData, format.Get());
 
 			if ((format.Get() & Format::Transpose) != Format::None) {
-				EncodePixels(pixel, colors.key, transposeIDs, formatData, format.Get());
+				EncodePixels(pixel, colors.value1, transposeIDs, formatData, format.Get());
 			}
 			else {
-				EncodePixels(pixel, colors.key, colors.value, formatData, format.Get());
+				EncodePixels(pixel, colors.value1, colors.value2, formatData, format.Get());
 			}
 
 			bestFormat = format.Get();
@@ -885,7 +886,7 @@ namespace Boxx {
 		}
 
 		try {
-			FileWriter file = FileWriter(filename);
+			FileWriter file = FileWriter(filename, FileMode::Binary);
 			file.Write(data);
 			file.Close();
 		}
@@ -938,7 +939,7 @@ namespace Boxx {
 		return formats;
 	}
 
-	inline Pair<List<ColorRGBA>, Array<UShort>> Pixel::GetColorIDs() const {
+	inline Tuple<List<ColorRGBA>, Array<UShort>> Pixel::GetColorIDs() const {
 		Set<ColorRGBA> colorSet;
 		
 		ColorRGBA transparent = ColorRGBA(0, 0, 0, 0);
@@ -972,7 +973,7 @@ namespace Boxx {
 			}
 		}
 
-		return Pair<List<ColorRGBA>, Array<UShort>>(colors, colorIDs);
+		return Tuple<List<ColorRGBA>, Array<UShort>>(colors, colorIDs);
 	}
 
 	inline void Pixel::operator=(const Pixel& pixel) {

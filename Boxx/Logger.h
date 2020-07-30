@@ -9,6 +9,7 @@
 #include "List.h"
 #include "Pair.h"
 #include "Optional.h"
+#include "Tuple.h"
 
 ///N Logger
 
@@ -95,16 +96,16 @@ namespace Boxx {
 
 		///T Iterator
 		/// Iterates over all logged messages
-		///S for (Pair<Logger::LogLevel, String> message : logger)
-		const Pair<LogLevel, String>* begin() const;
-		const Pair<LogLevel, String>* end() const;
+		///S for (Tuple<Logger::LogLevel, String> message : logger)
+		const Tuple<LogLevel, String>* begin() const;
+		const Tuple<LogLevel, String>* end() const;
 
 		void operator=(const Logger& logger);
 		void operator=(Logger&& logger) noexcept;
 
 	private:
 		Optional<FileWriter> file;
-		List<Pair<LogLevel, String>> loggedMessages;
+		List<Tuple<LogLevel, String>> loggedMessages;
 	};
 
 	///B LoggerError
@@ -159,14 +160,14 @@ namespace Boxx {
 	}
 
 	inline void Logger::Write(const String& str) {
-		loggedMessages.Add(Pair<LogLevel, String>(LogLevel::Write, str + "\n"));
+		loggedMessages.Add(Tuple<LogLevel, String>(LogLevel::Write, str + "\n"));
 		if (!file) return;
 		if (!file.Get().IsOpen()) throw LoggerFileError("file is not open");
 		file.Get().Write(str + "\n");
 	}
 
 	inline void Logger::Log(const String& str) {
-		loggedMessages.Add(Pair<LogLevel, String>(LogLevel::Log, "log: " + str + "\n"));
+		loggedMessages.Add(Tuple<LogLevel, String>(LogLevel::Log, "log: " + str + "\n"));
 		if (!file) return;
 		if (!file.Get().IsOpen()) throw LoggerFileError("file is not open");
 		file.Get().Write("log: " + str + "\n");
@@ -175,7 +176,7 @@ namespace Boxx {
 	inline void Logger::Info(const String& str) {
 		const String s = "info: " + str + "\n";
 		Console::Write(s);
-		loggedMessages.Add(Pair<LogLevel, String>(LogLevel::Info, s));
+		loggedMessages.Add(Tuple<LogLevel, String>(LogLevel::Info, s));
 		if (!file) return;
 		if (!file.Get().IsOpen()) throw LoggerFileError("file is not open");
 		file.Get().Write(s);
@@ -184,7 +185,7 @@ namespace Boxx {
 	inline void Logger::Warning(const String& str) {
 		const String s = "warning: " + str + "\n";
 		Console::Write(s);
-		loggedMessages.Add(Pair<LogLevel, String>(LogLevel::Warning, s));
+		loggedMessages.Add(Tuple<LogLevel, String>(LogLevel::Warning, s));
 		if (!file) return;
 		if (!file.Get().IsOpen()) throw LoggerFileError("file is not open");
 		file.Get().Write(s);
@@ -193,7 +194,7 @@ namespace Boxx {
 	inline void Logger::Error(const String& str) {
 		const String s = "error: " + str + "\n";
 		Console::Write(s);
-		loggedMessages.Add(Pair<LogLevel, String>(LogLevel::Error, s));
+		loggedMessages.Add(Tuple<LogLevel, String>(LogLevel::Error, s));
 		if (!file) return;
 		if (!file.Get().IsOpen()) throw LoggerFileError("file is not open");
 		file.Get().Write(s);
@@ -202,7 +203,7 @@ namespace Boxx {
 	inline void Logger::Fatal(const String& str) {
 		const String s = "fatal: " + str + "\n";
 		Console::Write(s);
-		loggedMessages.Add(Pair<LogLevel, String>(LogLevel::Fatal, s));
+		loggedMessages.Add(Tuple<LogLevel, String>(LogLevel::Fatal, s));
 		if (file) {
 			if (!file.Get().IsOpen()) throw LoggerFileError("file is not open");
 			file.Get().Write(s);
@@ -221,11 +222,11 @@ namespace Boxx {
 		return file.Get().IsOpen();
 	}
 
-	inline const Pair<Logger::LogLevel, String>* Logger::begin() const {
+	inline const Tuple<Logger::LogLevel, String>* Logger::begin() const {
 		return loggedMessages.begin();
 	}
 
-	inline const Pair<Logger::LogLevel, String>* Logger::end() const {
+	inline const Tuple<Logger::LogLevel, String>* Logger::end() const {
 		return loggedMessages.end();
 	}
 
