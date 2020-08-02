@@ -123,7 +123,7 @@ namespace Boxx {
 
 	template <class T>
 	inline bool Set<T>::IsEmpty() const {
-		return list.Empty();
+		return list.IsEmpty();
 	}
 
 	template <class T>
