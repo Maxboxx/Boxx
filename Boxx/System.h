@@ -6,17 +6,7 @@
 #include "List.h"
 #include "Error.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <string>
-#include <codecvt>
-#include <locale>
-
-#ifdef BOXX_WINDOWS
-	#include <direct.h>
-	#include <windows.h>
-#endif
+#include <filesystem>
 
 ///N System
 
@@ -53,64 +43,26 @@ namespace Boxx {
 	}
 
 	inline bool System::FileExists(const String& file) {
-		struct stat info;
-		return stat(file, &info) == 0;
+		return std::filesystem::is_regular_file((const char*)file);
 	}
 
 	inline bool System::DirectoryExists(const String& directory) {
-		struct stat info;
-
-		if (stat(directory, &info) != 0)
-			return false;
-		else if (info.st_mode & S_IFDIR)
-			return true;
-		else
-			return false;
+		return std::filesystem::is_directory((const char*)directory);
 	}
 
 	inline bool System::CreateDirectory(const String& directory) {
-		#ifdef BOXX_WINDOWS
-			return _mkdir(directory) != -1;
-		#else
-			return mkdir(directory, 0777) != -1;
-		#endif
+		return std::filesystem::create_directory((const char*)directory);
 	}
 
 	inline List<String> System::GetFilesInDirectory(const String& directory) {
-		#ifdef BOXX_WINDOWS
-			List<String> files;
-			
-			String searchPath;
-			
-			if (directory[directory.Size() - 1] == '/' || directory[directory.Size() - 1] == '\\') {
-				searchPath = directory + "*.*";
+		List<String> files;
+
+		for (const std::filesystem::directory_entry& entry : std::filesystem::directory_iterator((const char*)directory)) {
+			if (entry.is_regular_file()) {
+				files.Add(entry.path().filename().string());
 			}
-			else {
-				searchPath = directory + "/*.*";
-			}
+		}
 
-			std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
-
-			std::wstring path = converter.from_bytes(std::string((const char*)searchPath));
-
-			WIN32_FIND_DATA fd; 
-			HANDLE hFind = ::FindFirstFile(path.c_str(), &fd); 
-
-			if (hFind != INVALID_HANDLE_VALUE) { 
-				do {
-					if (!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
-						files.Add(String(converter.to_bytes(std::wstring(fd.cFileName))));
-					}
-				}
-				while (::FindNextFile(hFind, &fd));
-
-				::FindClose(hFind); 
-			}
-
-			return files;
-		#else
-			throw SystemNotSupportedError();
-			return List<String>();
-		#endif
+		return files;
 	}
 }
