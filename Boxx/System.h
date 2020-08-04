@@ -1,13 +1,21 @@
 #pragma once
 
+#include "Types.h"
 #include "String.h"
+#include "Array.h"
+#include "List.h"
+#include "Error.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <string>
+#include <codecvt>
+#include <locale>
 
 #ifdef BOXX_WINDOWS
 	#include <direct.h>
+	#include <windows.h>
 #endif
 
 ///N System
@@ -33,6 +41,11 @@ namespace Boxx {
 		/// Creates a directory
 		///R bool success: <code>true</code> if the directory was created. <code>false</code> otherwise.
 		static bool CreateDirectory(const String& directory);
+
+		///T Get Files in Directory
+		/// Gets a list of all files in the specified directory
+		///E SystemNotSupportedError: Thrown if the operating system is not Windows
+		static List<String> GetFilesInDirectory(const String& directory);
 	};
 
 	inline void System::Execute(const String& command) {
@@ -60,6 +73,44 @@ namespace Boxx {
 			return _mkdir(directory) != -1;
 		#else
 			return mkdir(directory, 0777) != -1;
+		#endif
+	}
+
+	inline List<String> System::GetFilesInDirectory(const String& directory) {
+		#ifdef BOXX_WINDOWS
+			List<String> files;
+			
+			String searchPath;
+			
+			if (directory[directory.Size() - 1] == '/' || directory[directory.Size() - 1] == '\\') {
+				searchPath = directory + "*.*";
+			}
+			else {
+				searchPath = directory + "/*.*";
+			}
+
+			std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
+
+			std::wstring path = converter.from_bytes(std::string((const char*)searchPath));
+
+			WIN32_FIND_DATA fd; 
+			HANDLE hFind = ::FindFirstFile(path.c_str(), &fd); 
+
+			if (hFind != INVALID_HANDLE_VALUE) { 
+				do {
+					if (!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+						files.Add(String(converter.to_bytes(std::wstring(fd.cFileName))));
+					}
+				}
+				while (::FindNextFile(hFind, &fd));
+
+				::FindClose(hFind); 
+			}
+
+			return files;
+		#else
+			throw SystemNotSupportedError();
+			return List<String>();
 		#endif
 	}
 }
