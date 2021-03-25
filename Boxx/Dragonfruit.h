@@ -9,6 +9,7 @@
 #include "List.h"
 #include "Map.h"
 #include "Regex.h"
+#include "Tuple.h"
 #include "Optional.h"
 #include "System.h"
 
@@ -60,6 +61,10 @@ namespace Boxx {
 		/// Regex patterns to use for automatically creating code.
 		///[para] All group matches will be concatenated.
 		List<Regex> codePatterns;
+
+		/// Regex patterns to use for automatically creating headings in blocks.
+		///[para] The pair key is the heading name and the value is the pattern.
+		List<Pair<String, Regex>> blockHeadingPatterns;
 
 		~DragonfruitInfo() {}
 	};
@@ -740,6 +745,13 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 				}
 
 				sections.Last().sections.Add(current);
+
+				if (sections.Last().type == DragonfruitType::Heading && sections.Last().block.Size() > 0) {
+					sections.Last().block = "";
+					current = sections.Last();
+					sections.RemoveLast();
+					EndComplete();
+				}
 			}
 			else {
 				completed.Add(current);
@@ -824,6 +836,20 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 							}
 
 							current.code.Add(code);
+							break;
+						}
+					}
+				}
+
+				if (!sections.IsEmpty() && sections.Last().type == DragonfruitType::Summary && sections.Last().block.Size() > 0) {
+					for (const Pair<String, Regex>& pattern : info.blockHeadingPatterns) {
+						if (Optional<Match> match = pattern.value.Match(code)) {
+							Dragonfruit heading;
+							heading.type = DragonfruitType::Heading;
+							heading.title = pattern.key;
+							heading.block = pattern.key;
+
+							sections.Add(heading);
 							break;
 						}
 					}
@@ -997,7 +1023,7 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 
 			case DragonfruitType::Namespace: {
 				newDir   = dir + title.Lower() + "/";
-				newRoot  = rootDir == "./" ? "../" : rootDir + "../";
+				newRoot  = rootDir == "./" ? String("../") : rootDir + "../";
 				filename = newDir + "index." + builder.FileExtension();
 
 				System::CreateDirectory(newDir);
@@ -1284,9 +1310,10 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 	inline bool Dragonfruit::ParseTitle(const DocComment& comment, ParseInfo& info, DragonfruitInfo& docInfo) {
 		if (comment.commentType == "T" || comment.commentType == "Title") {
 			if (info.current.type == DragonfruitType::None || info.current.type == DragonfruitType::Summary) {
-				info.current.type = DragonfruitType::Summary;
+				info.current.type  = DragonfruitType::Summary;
 				info.current.title = comment.content;
-				info.current.file = info.file;
+				info.current.file  = info.file;
+				info.currentIndent = comment.indent;
 			}
 
 			return true;
@@ -1300,8 +1327,7 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 			info.EndCategory();
 
 			if (info.current.type != DragonfruitType::None) {
-				info.current.block = comment.content.Size() == 0 ? "_" : comment.content.Split(":")[0].Trim();
-				info.currentIndent = comment.indent;
+				info.current.block = comment.content.Size() == 0 ? String("_") : comment.content.Split(":")[0].Trim();
 			}
 			else {
 				info.EndBlock();
@@ -1361,8 +1387,9 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 			info.EndCategory();
 
 			if (info.current.type == DragonfruitType::None) {
-				info.current.type = DragonfruitType::Summary;
-				info.current.file = info.file;
+				info.current.type  = DragonfruitType::Summary;
+				info.current.file  = info.file;
+				info.currentIndent = comment.indent;
 			}
 			
 			if (info.current.type == DragonfruitType::Summary) {
@@ -1482,7 +1509,7 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 			Optional<Match> match = Regex::Match("^%s*(%w+){%s*%:%s*(%w+)}?%n*$", comment.content);
 
 			if (match) {
-				String label = match->groups.Size() > 1 ? match->groups[1] : "";
+				String label = match->groups.Size() > 1 ? match->groups[1] : String("");
 				List<DocComment> comments;
 
 				if (!info.imported.Contains(match->groups[0], comments)) {
@@ -1542,8 +1569,9 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 	inline bool Dragonfruit::ParsePara(const DocComment& comment, ParseInfo& info, DragonfruitInfo& docInfo, const UInt items) {
 		if (comment.commentType == "p" || comment.commentType == "para" || comment.commentType == "paragraph") {
 			if (info.current.type == DragonfruitType::None) {
-				info.current.type = DragonfruitType::Summary;
-				info.current.file = info.file;
+				info.current.type  = DragonfruitType::Summary;
+				info.current.file  = info.file;
+				info.currentIndent = comment.indent;
 			}
 
 			info.current.description.AddInItem(items, DragonfruitDesc(DragonfruitDescType::Paragraph, comment.content));
@@ -1556,8 +1584,9 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 	inline bool Dragonfruit::ParseItem(const DocComment& comment, ParseInfo& info, DragonfruitInfo& docInfo, const UInt items) {
 		if (items > 0) {
 			if (info.current.type == DragonfruitType::None) {
-				info.current.type = DragonfruitType::Summary;
-				info.current.file = info.file;
+				info.current.type  = DragonfruitType::Summary;
+				info.current.file  = info.file;
+				info.currentIndent = comment.indent;
 			}
 
 			info.current.description.AddItem(items, comment.content);
@@ -1569,8 +1598,9 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 
 	inline bool Dragonfruit::ParseDescription(const DocComment& comment, ParseInfo& info, DragonfruitInfo& docInfo) {
 		if (info.current.type == DragonfruitType::None) {
-			info.current.type = DragonfruitType::Summary;
-			info.current.file = info.file;
+			info.current.type  = DragonfruitType::Summary;
+			info.current.file  = info.file;
+			info.currentIndent = comment.indent;
 		}
 
 		info.current.description.AddText(comment.content);
