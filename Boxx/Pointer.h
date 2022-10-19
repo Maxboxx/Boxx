@@ -142,7 +142,7 @@ namespace Boxx {
 
 	///[Title] WeakPointer
 	/// Contains a pointer from a {Pointer} but does not keep track of references or delete memory.
-	///W The weak pointer will contain an invalid pointer if all references to the pointer by {Pointer} objects are removed.
+	///[Warning] The weak pointer will contain an invalid pointer if all references to the pointer by {Pointer} objects are removed.
 	///[Block] WeakPointer
 	///M
 	template <class T>

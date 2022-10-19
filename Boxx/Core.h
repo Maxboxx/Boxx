@@ -33,11 +33,11 @@
 
 ///[Title] BOXX_VERSION_V2
 /// The second number of the library version.
-#define BOXX_VERSION_V2 4
+#define BOXX_VERSION_V2 5
 
 ///[Title] BOXX_VERSION_V3
 /// The third number of the library version.
-#define BOXX_VERSION_V3 2
+#define BOXX_VERSION_V3 0
 
 ///[Title] BOXX_VERSION
 /// A string containing the current library version.

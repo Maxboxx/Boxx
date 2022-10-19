@@ -47,6 +47,10 @@ namespace Boxx {
 		///[Error] MapKeyError: Thrown if the key already exists in the map.
 		void Add(const Pair<Key, Value>& pair);
 
+		/// Sets the value of the specified key.
+		///p Adds the key if it does not exist.
+		void Set(const Key& key, const Value& value);
+
 		/// Remove a key from the map if it exists.
 		void Remove(const Key& key);
 
@@ -176,6 +180,16 @@ namespace Boxx {
 		}
 
 		values.Insert(start, pair);
+	}
+
+	template <class Key, class Value>
+	inline void Map<Key, Value>::Set(const Key& key, const Value& value) {
+		if (Contains(key)) {
+			operator[](key) = value;
+		}
+		else {
+			Add(key, value);
+		}
 	}
 
 	template <class Key, class Value>
