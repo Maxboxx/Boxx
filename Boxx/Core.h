@@ -37,7 +37,7 @@
 
 ///[Title] BOXX_VERSION_V3
 /// The third number of the library version.
-#define BOXX_VERSION_V3 0
+#define BOXX_VERSION_V3 1
 
 ///[Title] BOXX_VERSION
 /// A string containing the current library version.

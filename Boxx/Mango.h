@@ -329,7 +329,7 @@ namespace Boxx {
 		Mango content;
 	};
 
-	Mango::ParsingInfo Mango::ParsingInfo::Copy() const {
+	inline Mango::ParsingInfo Mango::ParsingInfo::Copy() const {
 		ParsingInfo info;
 
 		for (const Pair<String, Mango>& pair : variables) {
