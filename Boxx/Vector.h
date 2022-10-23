@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _BOXX_VECTOR_HEADER
+#define _BOXX_VECTOR_HEADER
 
 #include "Types.h"
 #include <math.h>
@@ -682,3 +683,5 @@ namespace Boxx {
 	inline Vector3 operator%(const float f, const Vector3& v) {return Vector3(fmod(f, v.x), fmod(f, v.y), fmod(f, v.z));}
 	inline Vector4 operator%(const float f, const Vector4& v) {return Vector4(fmod(f, v.x), fmod(f, v.y), fmod(f, v.z), fmod(f, v.w));}
 }
+
+#endif

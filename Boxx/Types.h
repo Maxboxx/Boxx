@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _BOXX_TYPES_HEADER
+#define _BOXX_TYPES_HEADER
 
 #include "Core.h"
 #include <stdint.h>
@@ -41,3 +42,5 @@ namespace Boxx {
 	/// 64 bit unsigned integer
 	typedef uint64_t ULong;
 }
+
+#endif

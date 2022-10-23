@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _BOXX_PIXEL_HEADER
+#define _BOXX_PIXEL_HEADER
 
 #include "Types.h"
 #include "Array.h"
@@ -1014,3 +1015,5 @@ namespace Boxx {
 		pixels = std::move(pixel.pixels);
 	}
 }
+
+#endif

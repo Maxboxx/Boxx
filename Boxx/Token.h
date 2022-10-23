@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _BOXX_TOKEN_HEADER
+#define _BOXX_TOKEN_HEADER
 
 #include "Types.h"
 #include "String.h"
@@ -264,3 +265,5 @@ namespace Boxx {
 		this->pos = list.pos;
 	}
 }
+
+#endif

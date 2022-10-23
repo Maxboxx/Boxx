@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _BOXX_COLOR_HEADER
+#define _BOXX_COLOR_HEADER
 
 #include "Types.h"
 #include "Vector.h"
@@ -1365,3 +1366,5 @@ namespace Boxx {
 		return *this == color || *this > color;
 	}
 }
+
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _BOXX_OPTIONAL_HEADER
+#define _BOXX_OPTIONAL_HEADER
 
 #include <optional>
 
@@ -467,3 +468,5 @@ namespace Boxx {
 		return value;
 	}
 }
+
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _BOXX_STRING_HEADER
+#define _BOXX_STRING_HEADER
 
 #include <string>
 #include <cstring>
@@ -865,3 +866,6 @@ namespace Boxx {
 		return String::ToString(f) + s;
 	}
 }
+
+#endif
+

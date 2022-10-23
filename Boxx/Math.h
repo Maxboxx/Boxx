@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _BOXX_MATH_HEADER
+#define _BOXX_MATH_HEADER
 
 #include <stdint.h>
 #include "Types.h"
@@ -292,3 +293,5 @@ namespace Boxx {
 	inline constexpr float Math::FloatMin() {return -INFINITY;}
 	inline constexpr float Math::FloatMax() {return INFINITY;}
 }
+
+#endif

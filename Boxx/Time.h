@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _BOXX_TIME_HEADER
+#define _BOXX_TIME_HEADER
 
 #include <chrono>
 #include "Types.h"
@@ -68,3 +69,5 @@ namespace Boxx {
 		totalTime() = clock::now();
 	}
 }
+
+#endif

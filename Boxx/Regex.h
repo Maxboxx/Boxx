@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _BOXX_REGEX_HEADER
+#define _BOXX_REGEX_HEADER
 
 #include "Error.h"
 #include "Types.h"
@@ -1846,3 +1847,4 @@ namespace Boxx {
 	}
 }
 
+#endif

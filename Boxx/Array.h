@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _BOXX_ARRAY_HEADER
+#define _BOXX_ARRAY_HEADER
 
 #include "Types.h"
 #include "Error.h"
@@ -309,3 +310,5 @@ namespace Boxx {
 		return arr2 != arr1;
 	}
 }
+
+#endif

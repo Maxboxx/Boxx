@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _BOXX_QUATERNION_HEADER
+#define _BOXX_QUATERNION_HEADER
 
 #include "Vector.h"
 #include "Matrix.h"
@@ -290,3 +291,5 @@ namespace Boxx {
 		return Quaternion(f / q.x, f / q.y, f / q.z, f / q.w);
 	}
 }
+
+#endif

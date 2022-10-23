@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _BOXX_BUFFER_HEADER
+#define _BOXX_BUFFER_HEADER
 
 #include "Types.h"
 #include "String.h"
@@ -287,3 +288,5 @@ namespace Boxx {
 		return source != target;
 	}
 }
+
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _BOXX_PAIR_HEADER
+#define _BOXX_PAIR_HEADER
 
 #include "Types.h"
 
@@ -39,3 +40,5 @@ namespace Boxx {
 		~Pair() {}
 	};
 }
+
+#endif

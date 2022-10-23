@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _BOXX_FILE_HEADER
+#define _BOXX_FILE_HEADER
 
 #include <fstream>
 #include <iostream>
@@ -387,3 +388,5 @@ namespace Boxx {
 		this->file = std::move(file.file);
 	}
 }
+
+#endif

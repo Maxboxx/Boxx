@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _BOXX_STACK_HEADER
+#define _BOXX_STACK_HEADER
 
 #include "Types.h"
 #include "List.h"
@@ -167,3 +168,5 @@ namespace Boxx {
 		return this->stack != stack.stack;
 	}
 }
+
+#endif

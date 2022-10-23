@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _BOXX_MATRIX_HEADER
+#define _BOXX_MATRIX_HEADER
 
 #include "Types.h"
 #include "Vector.h"
@@ -537,3 +538,5 @@ namespace Boxx {
 		);
 	}
 }
+
+#endif

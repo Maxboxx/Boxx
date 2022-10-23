@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _BOXX_POINTER_HEADER
+#define _BOXX_POINTER_HEADER
 
 #include "Types.h"
 
@@ -734,3 +735,5 @@ namespace Boxx {
 		return ptr2 != ptr1;
 	}
 }
+
+#endif

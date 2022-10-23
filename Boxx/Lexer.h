@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _BOXX_LEXER_HEADER
+#define _BOXX_LEXER_HEADER
 
 #include "Types.h"
 #include "Token.h"
@@ -107,3 +108,5 @@ namespace Boxx {
 		return TokenList<T>(tokens);
 	}
 }
+
+#endif

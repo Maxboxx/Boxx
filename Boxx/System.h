@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _BOXX_SYSTEM_HEADER
+#define _BOXX_SYSTEM_HEADER
 
 #include "Types.h"
 #include "String.h"
@@ -105,3 +106,5 @@ namespace Boxx {
 		return dirs;
 	}
 }
+
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _BOXX_ERROR_HEADER
+#define _BOXX_ERROR_HEADER
 
 #include <stdexcept>
 #include "Types.h"
@@ -65,3 +66,5 @@ namespace Boxx {
 		virtual String Name() const override;
 	};
 }
+
+#endif

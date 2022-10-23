@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _BOXX_STRINGBUILDER_HEADER
+#define _BOXX_STRINGBUILDER_HEADER
 
 #include "Types.h"
 #include "String.h"
@@ -132,3 +133,5 @@ namespace Boxx {
 		return String(string);
 	}
 }
+
+#endif

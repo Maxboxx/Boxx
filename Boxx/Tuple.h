@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _BOXX_TUPLE_HEADER
+#define _BOXX_TUPLE_HEADER
 
 #include "Types.h"
 #include "String.h"
@@ -242,3 +243,5 @@ namespace Boxx {
 		}
 	};
 }
+
+#endif

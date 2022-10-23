@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _BOXX_MAP_HEADER
+#define _BOXX_MAP_HEADER
 
 #include "Types.h"
 #include "Pair.h"
@@ -314,3 +315,5 @@ namespace Boxx {
 		return values.end();
 	}
 }
+
+#endif

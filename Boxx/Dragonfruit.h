@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _BOXX_DRAGONFRUIT_HEADER
+#define _BOXX_DRAGONFRUIT_HEADER
 
 #include "Types.h"
 #include "String.h"
@@ -1607,3 +1608,5 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 		return true;
 	}
 }
+
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _BOXX_CONSOLE_HEADER
+#define _BOXX_CONSOLE_HEADER
 
 #include <iostream>
 
@@ -87,3 +88,5 @@ namespace Boxx {
 		return Read();
 	}
 }
+
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _BOXX_LOGGER_HEADER
+#define _BOXX_LOGGER_HEADER
 
 #include "Types.h"
 #include "String.h"
@@ -268,3 +269,5 @@ namespace Boxx {
 		loggedMessages = std::move(logger.loggedMessages);
 	}
 }
+
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _BOXX_REPLACEMENTMAP_HEADER
+#define _BOXX_REPLACEMENTMAP_HEADER
 
 #include "Types.h"
 #include "Map.h"
@@ -208,3 +209,5 @@ namespace Boxx {
 		return map.end();
 	}
 }
+
+#endif

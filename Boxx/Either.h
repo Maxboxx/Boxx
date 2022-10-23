@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _BOXX_EITHER_HEADER
+#define _BOXX_EITHER_HEADER
 
 #include "Types.h"
 #include "Error.h"
@@ -259,3 +260,5 @@ namespace Boxx {
 		return right;
 	}
 }
+
+#endif

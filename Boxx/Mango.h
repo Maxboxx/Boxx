@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _BOXX_MANGO_HEADER
+#define _BOXX_MANGO_HEADER
 
 #include "Types.h"
 #include "List.h"
@@ -1385,3 +1386,4 @@ namespace Boxx {
 	}
 }
 
+#endif

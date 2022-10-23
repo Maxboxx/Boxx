@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _BOXX_SET_HEADER
+#define _BOXX_SET_HEADER
 
 #include "Types.h"
 #include "List.h"
@@ -332,3 +333,5 @@ namespace Boxx {
 		return list.end();
 	}
 }
+
+#endif

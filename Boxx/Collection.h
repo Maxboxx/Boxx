@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _BOXX_COLLECTION_HEADER
+#define _BOXX_COLLECTION_HEADER
 
 #include "Types.h"
 #include "Array.h"
@@ -358,3 +359,5 @@ namespace Boxx {
 		return list->list + list->size;
 	}
 }
+
+#endif
