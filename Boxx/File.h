@@ -68,7 +68,7 @@ namespace Boxx {
 		/// Checks if the file is open.
 		bool IsOpen();
 
-		///[Heading ]Iterators
+		///[Heading] Iterators
 
 		class LineIterator {
 		public:
@@ -92,6 +92,16 @@ namespace Boxx {
 
 		void operator=(const FileReader& file);
 		void operator=(FileReader&& file) noexcept;
+
+		///[Heading] Static Functions
+
+		/// Reads the text from the specified file.
+		///[Error] FileNotFoundError: Thrown if the file was not found.
+		static String ReadText(const String& filename, const FileMode mode = FileMode::None);
+
+		/// Reads the contents of the specified file as a buffer.
+		///[Error] FileNotFoundError: Thrown if the file was not found.
+		static Buffer ReadBuffer(const String& filename, const FileMode mode = FileMode::None);
 
 	private:
 		Pointer<std::ifstream> file;
@@ -132,6 +142,16 @@ namespace Boxx {
 
 		void operator=(const FileWriter& file);
 		void operator=(FileWriter&& file) noexcept;
+
+		///[Heading] Static Functions
+
+		/// Writes text to the specified file.
+		///[Error] FileOpenError: Thrown if the file can not be opened.
+		static void WriteText(const String& filename, const String& text, const FileMode mode = FileMode::None);
+
+		/// Writes the contents of a buffer to the specified file.
+		///[Error] FileOpenError: Thrown if the file can not be opened.
+		static void WriteBuffer(const String& filename, const Buffer& buffer, const FileMode mode = FileMode::None);
 
 	private:
 		Pointer<std::ofstream> file;
@@ -330,6 +350,20 @@ namespace Boxx {
 		return !file->done;
 	}
 
+	inline String FileReader::ReadText(const String& filename, const FileMode mode) {
+		FileReader reader = FileReader(filename, mode);
+		String text = reader.ReadAll();
+		reader.Close();
+		return text;
+	}
+
+	inline Buffer FileReader::ReadBuffer(const String& filename, const FileMode mode) {
+		FileReader reader = FileReader(filename, mode);
+		Buffer buffer = reader.ReadToBuffer();
+		reader.Close();
+		return buffer;
+	}
+
 	inline FileWriter::FileWriter() {
 
 	}
@@ -386,6 +420,18 @@ namespace Boxx {
 
 	inline void FileWriter::operator=(FileWriter&& file) noexcept {
 		this->file = std::move(file.file);
+	}
+
+	inline void FileWriter::WriteText(const String& filename, const String& text, const FileMode mode) {
+		FileWriter writer = FileWriter(filename, mode);
+		writer.Write(text);
+		writer.Close();
+	}
+
+	inline void FileWriter::WriteBuffer(const String& filename, const Buffer& buffer, const FileMode mode) {
+		FileWriter writer = FileWriter(filename, mode);
+		writer.Write(buffer);
+		writer.Close();
 	}
 }
 

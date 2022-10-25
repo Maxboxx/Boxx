@@ -18,21 +18,29 @@ namespace Boxx {
 	public:
 		///[Heading] Static Functions
 
-		///[Title] Combine
 		/// Combines two path segments.
 		static String Combine(const String& path1, const String& path2);
 
-		///[Title] Combine
 		/// Combines three path segments.
 		static String Combine(const String& path1, const String& path2, const String& path3);
 
-		///[Title] IsEqual
 		/// Checks if {path1} is equal to {path2}.
 		static bool IsEqual(const String& path1, const String& path2);
 
-		///[Title] GetExtension
+		/// Gets the directory of the path.
+		static String GetDirectory(const String& path);
+
+		/// Gets the file name and extension of the path.
+		static String GetFile(const String& path);
+
+		/// Gets the file name without the extension of the path.
+		static String GetFileName(const String& path);
+
 		/// Gets the file extension of the path.
 		static String GetExtension(const String& path);
+
+		/// Sets the file extension of the path.
+		static String SetExtension(const String& path, const String& extension);
 
 	private:
 		static char ExtSeparator() {
@@ -105,6 +113,49 @@ namespace Boxx {
 		return true;
 	}
 
+	inline String Path::GetDirectory(const String& path) {
+		for (Int i = path.Length(); i >= 0; i--) {
+			if (IsSeparator(path[i])) {
+				return path.Sub(0, i - 1);
+			}
+		}
+
+		return "";
+	}
+
+	inline String Path::GetFile(const String& path) {
+		for (Int i = path.Length(); i >= 0; i--) {
+			if (IsSeparator(path[i])) {
+				return path.Sub(i + 1);
+			}
+		}
+
+		return "";
+	}
+
+	inline String Path::GetFileName(const String& path) {
+		Int extSepIndex = -1;
+
+		for (Int i = path.Length(); i >= 0; i--) {
+			char c = path[i];
+
+			if (IsSeparator(c)) {
+				if (extSepIndex >= 0) {
+					return path.Sub(i + 1, extSepIndex - 1);
+				}
+				else {
+					return path.Sub(i + 1);
+				}
+			}
+
+			if (extSepIndex < 0 && IsExtSeparator(c)) {
+				extSepIndex = i;
+			}
+		}
+
+		return "";
+	}
+
 	inline String Path::GetExtension(const String& path) {
 		for (Int i = path.Length(); i >= 0; i--) {
 			char c = path[i];
@@ -119,6 +170,16 @@ namespace Boxx {
 		}
 
 		return "";
+	}
+
+	inline String Path::SetExtension(const String& path, const String& extension) {
+		String file = Path::GetFileName(path);
+
+		if (extension.Length() > 0) {
+			file += ExtSeparator() + extension;
+		}
+
+		return Path::Combine(Path::GetDirectory(path), file);
 	}
 }
 

@@ -67,12 +67,12 @@ namespace Boxx {
 		
 		/// Gets a substring from the string.
 		///[Arg] start: The starting index for the substring.
-		String Sub(const UInt start) const;
+		String Sub(UInt start) const;
 
 		/// Gets a substring from the string.
 		///[Arg] start: The starting index for the substring.
 		///[Arg] end: The ending index for the substring.
-		String Sub(const UInt start, const UInt end) const;
+		String Sub(UInt start, UInt end) const;
 
 		/// Splits a string into an array of substrings using a separator.
 		Array<String> Split(const String& sep) const;
@@ -362,14 +362,16 @@ namespace Boxx {
 		return len == 0;
 	}
 
-	inline String String::Sub(const UInt start) const {
+	inline String String::Sub(UInt start) const {
 		char* const cstr = new char[(ULong)len - start + 1];
 		std::memcpy(cstr, str + start, sizeof(char) * (len - start));
 		cstr[len - start] = '\0';
 		return String(cstr, len - start, true);
 	}
 
-	inline String String::Sub(const UInt start, const UInt end) const {
+	inline String String::Sub(UInt start, UInt end) const {
+		if (end < start) end = start;
+
 		char* const cstr = new char[(ULong)end - start + 2];
 		std::memcpy(cstr, str + start, sizeof(char) * ((ULong)end - start + 1));
 		cstr[end - start + 1] = '\0';
