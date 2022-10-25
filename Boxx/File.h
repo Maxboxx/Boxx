@@ -269,7 +269,7 @@ namespace Boxx {
 		done = true;
 
 		String data = String(ss.str().c_str(), (unsigned int)ss.str().size());
-		Buffer buf = Buffer(data.Size());
+		Buffer buf = Buffer(data.Length());
 		buf.Write(data);
 		buf.SetPos(0);
 		return buf;
@@ -361,7 +361,7 @@ namespace Boxx {
 		if (!IsOpen())
 			throw FileClosedError("File is closed");
 
-		file->write(text, text.Size());
+		file->write(text, text.Length());
 	}
 
 	inline void FileWriter::Write(const Buffer& data) {
@@ -369,7 +369,7 @@ namespace Boxx {
 			throw FileClosedError("File is closed");
 
 		String text = data.ToString();
-		file->write(text, text.Size());
+		file->write(text, text.Length());
 	}
 
 	inline void FileWriter::Close() {

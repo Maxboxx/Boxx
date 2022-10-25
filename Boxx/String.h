@@ -60,7 +60,10 @@ namespace Boxx {
 		///[Heading] Methods
 
 		/// Gets the size of the string.
-		UInt Size() const;
+		UInt Length() const;
+
+		/// Checks if the string is empty.
+		bool IsEmpty() const;
 		
 		/// Gets a substring from the string.
 		///[Arg] start: The starting index for the substring.
@@ -307,7 +310,7 @@ namespace Boxx {
 	}
 
 	inline String::String(const Array<char>& arr) {
-		len = arr.Size();
+		len = arr.Length();
 		this->str = new char[(ULong)len + 1];
 		str[len] = '\0';
 		alloc = true;
@@ -315,7 +318,7 @@ namespace Boxx {
 	}
 
 	inline String::String(const List<char>& list) {
-		len = list.Size();
+		len = list.Count();
 		this->str = new char[(ULong)len + 1];
 		str[len] = '\0';
 		alloc = true;
@@ -351,8 +354,12 @@ namespace Boxx {
 			delete[] str;
 	}
 
-	inline UInt String::Size() const {
+	inline UInt String::Length() const {
 		return len;
+	}
+
+	inline bool String::IsEmpty() const {
+		return len == 0;
 	}
 
 	inline String String::Sub(const UInt start) const {
@@ -373,12 +380,12 @@ namespace Boxx {
 		List<String> strings;
 		int start = 0;
 
-		for (UInt i = 0; i < Size(); i++) {
-			const UInt end = i + sep.Size();
+		for (UInt i = 0; i < Length(); i++) {
+			const UInt end = i + sep.Length();
 			bool found = true;
 
 			for (UInt u = i, k = 0; u < end; u++) {
-				if (u >= Size() || str[u] != sep.str[k++]) {
+				if (u >= Length() || str[u] != sep.str[k++]) {
 					found = false;
 					break;
 				}
@@ -398,12 +405,12 @@ namespace Boxx {
 	inline String String::Trim() const {
 		static const char whitespace[] = {' ', '\t', '\n', '\r', '\v', '\0'};
 
-		if (Size() == 0) return String();
+		if (Length() == 0) return String();
 
 		UInt start;
 		Long end;
 
-		for (start = 0; start < Size(); start++) {
+		for (start = 0; start < Length(); start++) {
 			bool white = false;
 
 			for (UInt i = 0; i < 6; i++) {
@@ -418,7 +425,7 @@ namespace Boxx {
 			}
 		}
 
-		for (end = (Long)Size() - 1; end >= 0; end--) {
+		for (end = (Long)Length() - 1; end >= 0; end--) {
 			bool white = false;
 
 			for (UInt i = 0; i < 6; i++) {
@@ -437,7 +444,7 @@ namespace Boxx {
 	}
 
 	inline String String::Escape() const {
-		List<char> chars{Size() + 1};
+		List<char> chars{Length() + 1};
 
 		for (const char c : *this) {
 			switch (c) {
@@ -467,11 +474,11 @@ namespace Boxx {
 			}
 		}
 
-		return String(chars.list->list, chars.Size());
+		return String(chars.list->list, chars.Count());
 	}
 
 	inline String String::Lower() const {
-		List<char> chars{Size()};
+		List<char> chars{Length()};
 
 		for (const char c : *this) {
 			if (c >= 'A' && c <= 'Z') {
@@ -482,11 +489,11 @@ namespace Boxx {
 			}
 		}
 
-		return String(chars.list->list, chars.Size());
+		return String(chars.list->list, chars.Count());
 	}
 
 	inline String String::Upper() const {
-		List<char> chars{Size()};
+		List<char> chars{Length()};
 
 		for (const char c : *this) {
 			if (c >= 'a' && c <= 'z') {
@@ -497,17 +504,17 @@ namespace Boxx {
 			}
 		}
 
-		return String(chars.list->list, chars.Size());
+		return String(chars.list->list, chars.Count());
 	}
 
 	inline String String::Replace(const String& search, const String& replace) const {
-		List<char> chars{Size()};
+		List<char> chars{Length()};
 
-		for (UInt i = 0; i < Size(); i++) {
-			if (str[i] == search.str[0] && Size() - i >= search.Size()) {
+		for (UInt i = 0; i < Length(); i++) {
+			if (str[i] == search.str[0] && Length() - i >= search.Length()) {
 				bool found = true;
 
-				for (UInt u = 1; u < search.Size(); u++) {
+				for (UInt u = 1; u < search.Length(); u++) {
 					if (str[i + u] != search.str[u]) {
 						found = false;
 						break;
@@ -519,7 +526,7 @@ namespace Boxx {
 						chars.Add(c);
 					}
 
-					i += search.Size() - 1;
+					i += search.Length() - 1;
 				}
 				else {
 					chars.Add(str[i]);
@@ -530,11 +537,11 @@ namespace Boxx {
 			}
 		}
 
-		return String(chars.list->list, chars.Size());
+		return String(chars.list->list, chars.Count());
 	}
 
 	inline String String::Repeat(const UInt rep) const {
-		const UInt len = Size();
+		const UInt len = Length();
 		char* str = new char[len * rep + 1];
 
 		for (UInt i = 0; i < rep; i++) {
@@ -547,11 +554,11 @@ namespace Boxx {
 	}
 
 	inline Optional<UInt> String::Find(const String& search, const UInt start) const {
-		for (UInt i = start; i < Size(); i++) {
-			if (str[i] == search.str[0] && Size() - i >= search.Size()) {
+		for (UInt i = start; i < Length(); i++) {
+			if (str[i] == search.str[0] && Length() - i >= search.Length()) {
 				bool found = true;
 
-				for (UInt u = 1; u < search.Size(); u++) {
+				for (UInt u = 1; u < search.Length(); u++) {
 					if (str[i + u] != search.str[u]) {
 						found = false;
 						break;
@@ -694,7 +701,7 @@ namespace Boxx {
 	}
 
 	inline bool String::operator<(const String& s) const {
-		const UInt size = Size() < s.Size() ? Size() : s.Size();
+		const UInt size = Length() < s.Length() ? Length() : s.Length();
 
 		for (UInt i = 0; i < size; i++) {
 			if (str[i] < s.str[i])
@@ -704,7 +711,7 @@ namespace Boxx {
 			}
 		}
 
-		return Size() < s.Size();
+		return Length() < s.Length();
 	}
 
 	inline bool operator>(const char* const s, const String& str) {
@@ -735,7 +742,7 @@ namespace Boxx {
 	}
 
 	inline bool String::operator<=(const String& s) const {
-		const UInt size = Size() < s.Size() ? Size() : s.Size();
+		const UInt size = Length() < s.Length() ? Length() : s.Length();
 
 		for (UInt i = 0; i < size; i++) {
 			if (str[i] < s.str[i])
@@ -793,7 +800,7 @@ namespace Boxx {
 		oss << std::fixed << std::setprecision(20) << f;
 		const String str = oss.str().c_str();
 
-		for (UInt i = str.Size(); i > 0; i--) {
+		for (UInt i = str.Length(); i > 0; i--) {
 			if (str[i] == '.')
 				return str.Sub(0, i + 1);
 			else if (str[i] != '0' && str[i] != '\0')
@@ -808,7 +815,7 @@ namespace Boxx {
 		oss << std::fixed << std::setprecision(20) << d;
 		const String str = oss.str().c_str();
 
-		for (UInt i = str.Size(); i > 0; i--) {
+		for (UInt i = str.Length(); i > 0; i--) {
 			if (str[i] == '.')
 				return str.Sub(0, i + 1);
 			else if (str[i] != '0' && str[i] != '\0')

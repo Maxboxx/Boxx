@@ -143,7 +143,7 @@ namespace Boxx {
 
 		/// Returns the size of the mango list.
 		///[Error] MangoTypeError: Thrown if the mango type is not list.
-		UInt Size() const;
+		UInt Length() const;
 
 		/// Copies the mango value.
 		Mango Copy() const;
@@ -567,9 +567,9 @@ namespace Boxx {
 		}
 	}
 
-	inline UInt Mango::Size() const {
+	inline UInt Mango::Length() const {
 		if (type != MangoType::List) throw MangoTypeError("Type is not list");
-		return list.Size();
+		return list.Count();
 	}
 
 	inline Mango Mango::Copy() const {
@@ -823,7 +823,7 @@ namespace Boxx {
 
 		String str = "";
 
-		if (mango.label.Size() > 0) {
+		if (mango.label.Length() > 0) {
 			if (labelPattern.Match(mango.label))
 				str += mango.label + ":";
 			else
@@ -856,7 +856,7 @@ namespace Boxx {
 				for (const Mango& m : mango.list)
 					str += EncodeNode(m) + " ";
 
-				str = str.Sub(0, str.Size() - 2) + "]";
+				str = str.Sub(0, str.Length() - 2) + "]";
 				break;
 			}
 			case MangoType::Map: {
@@ -871,7 +871,7 @@ namespace Boxx {
 					str += EncodeNode(m.value) + " ";
 				}
 
-				str = str.Sub(0, str.Size() - 2) + "}";
+				str = str.Sub(0, str.Length() - 2) + "}";
 				break;
 			}
 		}
@@ -885,7 +885,7 @@ namespace Boxx {
 		const String nextTabs = tabs + "\t";
 		String str = "";
 
-		if (mango.label.Size() > 0) {
+		if (mango.label.Length() > 0) {
 			if (labelPattern.Match(mango.label))
 				str += mango.label + ": ";
 			else
@@ -930,7 +930,7 @@ namespace Boxx {
 					else
 						str += nextTabs + "\"" + m.key.Escape() + "\"";
 
-					if (m.value.label.Size() == 0) {
+					if (m.value.label.Length() == 0) {
 						str += ": ";
 					}
 					else {
@@ -1087,7 +1087,7 @@ namespace Boxx {
 
 			Map<String, Mango> vars;
 
-			UInt size = Math::Min(values.Size(), t.vars.Size());
+			UInt size = Math::Min(values.Count(), t.vars.Count());
 
 			for (UInt i = 0; i < size; i++) {
 				vars.Add(t.vars[i], values[i]);

@@ -250,7 +250,7 @@ namespace Boxx {
 
 	template <class T>
 	inline UInt TokenList<T>::Size() const {
-		return list.Size();
+		return list.Count();
 	}
 
 	template <class T>

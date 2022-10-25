@@ -193,12 +193,12 @@ namespace Boxx {
 
 	template <>
 	inline void Buffer::Write(const String& data, const Endian endian) {
-		while (data.Size() * sizeof(char) + currentPos > capacity) {
+		while (data.Length() * sizeof(char) + currentPos > capacity) {
 			Grow();
 		}
 
-		std::memcpy(&this->data[currentPos], (const char*)data, data.Size() * sizeof(char));
-		currentPos += data.Size() * sizeof(char);
+		std::memcpy(&this->data[currentPos], (const char*)data, data.Length() * sizeof(char));
+		currentPos += data.Length() * sizeof(char);
 		if (currentPos > size) size = currentPos;
 	}
 

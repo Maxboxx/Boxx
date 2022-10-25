@@ -39,8 +39,8 @@ namespace Boxx {
 
 		///[Heading] Methods
 
-		/// Returns the current size of the set.
-		UInt Size() const;
+		/// Returns the current item count of the set.
+		UInt Count() const;
 
 		/// Returns the current capacity of the set.
 		UInt Capacity() const;
@@ -124,8 +124,8 @@ namespace Boxx {
 	}
 
 	template <class T>
-	inline UInt Set<T>::Size() const {
-		return list.Size();
+	inline UInt Set<T>::Count() const {
+		return list.Count();
 	}
 
 	template <class T>
@@ -141,7 +141,7 @@ namespace Boxx {
 	template <class T>
 	inline void Set<T>::Add(const T& value) {
 		int start = 0;
-		int end = list.Size();
+		int end = list.Count();
 		int i;
 
 		while (start != end) {
@@ -179,9 +179,9 @@ namespace Boxx {
 	template <class T>
 	inline Collection<Set<T>> Set<T>::Combinations(const UInt numElements) const {
 		Collection<Set<T>> combinations;
-		Array<bool> used = Array<bool>(Size());
+		Array<bool> used = Array<bool>(Count());
 
-		for (UInt i = 0; i < used.Size(); i++)
+		for (UInt i = 0; i < used.Length(); i++)
 			used[i] = false;
 
 		Combinations(used, 0, 0, numElements, combinations);
@@ -192,12 +192,12 @@ namespace Boxx {
 	template <class T>
 	inline Collection<Set<T>> Set<T>::AllCombinations() const {
 		Collection<Set<T>> combinations;
-		Array<bool> used = Array<bool>(Size());
+		Array<bool> used = Array<bool>(Count());
 
-		for (UInt i = 0; i < used.Size(); i++)
+		for (UInt i = 0; i < used.Length(); i++)
 			used[i] = false;
 
-		for (UInt i = 0; i < Size() + 1; i++)
+		for (UInt i = 0; i < Count() + 1; i++)
 			Combinations(used, 0, 0, i, combinations);
 
 		return combinations;
@@ -211,14 +211,14 @@ namespace Boxx {
 		else if (count == numElements) {
 			Set<T> comb = Set<T>(count);
 
-			for (UInt i = 0; i < Size(); i++) {
+			for (UInt i = 0; i < Count(); i++) {
 				if (used[i]) comb.Add(list[i]);
 			}
 
 			combinations.Add(comb);
 		}
-		else if (numElements >= Size()) {
-			Set<T> comb = Set<T>(Size());
+		else if (numElements >= Count()) {
+			Set<T> comb = Set<T>(Count());
 
 			for (const T& t : *this) {
 				comb.Add(t);
@@ -226,7 +226,7 @@ namespace Boxx {
 
 			combinations.Add(comb);
 		}
-		else if (index < Size()) {
+		else if (index < Count()) {
 			used[index] = true;
 			Combinations(used, index + 1, count + 1, numElements, combinations);
 
@@ -254,7 +254,7 @@ namespace Boxx {
 	
 	template <class T>
 	inline Set<T> Set<T>::Union(const Set<T>& set1, const Set<T>& set2) {
-		Set<T> set{set1.Size()};
+		Set<T> set{set1.Count()};
 
 		for (const T& v : set1)
 			set.Add(v);
@@ -303,7 +303,7 @@ namespace Boxx {
 	template <class T>
 	inline UInt Set<T>::BinarySearch(const T& value) const {
 		UInt start = 0;
-		UInt end = list.Size();
+		UInt end = list.Count();
 		UInt i;
 
 		while (start != end) {

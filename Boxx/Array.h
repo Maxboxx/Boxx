@@ -40,10 +40,10 @@ namespace Boxx {
 
 		///[Heading] Methods
 
-		/// Returns the size of the array.
-		UInt Size() const;
+		/// Returns the length of the array.
+		UInt Length() const;
 
-		/// Checks if the size of the array is {0}.
+		/// Checks if the length of the array is {0}.
 		bool IsEmpty() const;
 
 		/// Checks if the array contains the specified value.
@@ -163,7 +163,7 @@ namespace Boxx {
 	}
 
 	template <class T>
-	inline UInt Array<T>::Size() const {
+	inline UInt Array<T>::Length() const {
 		return size;
 	}
 
@@ -174,29 +174,29 @@ namespace Boxx {
 
 	template <class T>
 	inline bool Array<T>::Contains(const T& value) const {
-		for (UInt i = 0; i < Size(); i++) if (array[i] == value) return true;
+		for (UInt i = 0; i < Length(); i++) if (array[i] == value) return true;
 		return false;
 	}
 
 	template <class T>
 	inline T& Array<T>::Last(const UInt pos) {
-		return array[Size() - pos - 1];
+		return array[Length() - pos - 1];
 	}
 
 	template <class T>
 	inline const T& Array<T>::Last(const UInt pos) const {
-		return array[Size() - pos - 1];
+		return array[Length() - pos - 1];
 	}
 
 	template <class T>
 	inline Array<T> Array<T>::Copy() const {
-		Array<T> arr{Size()};
+		Array<T> arr{Length()};
 		
-		T* const last = &arr.array[Size()];
+		T* const last = &arr.array[Length()];
 		T* source = array;
 
 		if (std::is_trivially_copyable<T>::value)
-			memmove(arr.array, array, sizeof(T) * Size());
+			memmove(arr.array, array, sizeof(T) * Length());
 		else for (T* dest = arr.array; dest != last; dest++, source++)
 			*dest = *source;
 

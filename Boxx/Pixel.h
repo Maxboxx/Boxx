@@ -206,7 +206,7 @@ namespace Boxx {
 	}
 
 	inline Pixel::Pixel(const UShort width, const UShort height, const Array<ColorRGBA>& pixels) {
-		if ((UInt)width * (UInt)height != pixels.Size()) throw PixelSizeError("The array size does not match the image size");
+		if ((UInt)width * (UInt)height != pixels.Length()) throw PixelSizeError("The array size does not match the image size");
 
 		this->width = width;
 		this->height = height;
@@ -250,7 +250,7 @@ namespace Boxx {
 	}
 
 	inline void Pixel::SetPixels(const Array<ColorRGBA>& pixels) {
-		if ((UInt)width * (UInt)height != pixels.Size()) throw PixelSizeError("The array size does not match the image size");
+		if ((UInt)width * (UInt)height != pixels.Length()) throw PixelSizeError("The array size does not match the image size");
 		this->pixels = pixels;
 	}
 
@@ -354,7 +354,7 @@ namespace Boxx {
 	inline void Pixel::DecodeDefault(Pixel& pixel, Buffer& data, const Format format, const Array<ColorRGBA>& colors) {
 		bool doubleBytes = (format & Format::DoubleBytes) != Format::None;
 
-		UByte colorBits = GetBitCount2(colors.Size());
+		UByte colorBits = GetBitCount2(colors.Length());
 		UByte segments = (doubleBytes ? 16 : 8) / colorBits;
 
 		UShort colorMask = (doubleBytes ? Math::UShortMax() : Math::UByteMax()) >> ((doubleBytes ? 16 : 8) - colorBits);
@@ -377,7 +377,7 @@ namespace Boxx {
 	inline void Pixel::DecodeRepeat(Pixel& pixel, Buffer& data, const Format format, const Array<ColorRGBA>& colors) {
 		bool doubleBytes = (format & Format::DoubleBytes) != Format::None;
 
-		UByte colorBits = GetBitCount(colors.Size());
+		UByte colorBits = GetBitCount(colors.Length());
 		UByte repeatBits = (doubleBytes ? 16 : 8) - colorBits;
 
 		UShort colorMask = (doubleBytes ? Math::UShortMax() : Math::UByteMax()) >> repeatBits;
@@ -409,19 +409,19 @@ namespace Boxx {
 		UShort colorMask = 0;
 
 		if (repeat) {
-			colorBits = GetBitCount(colors.Size());
+			colorBits = GetBitCount(colors.Length());
 			repeatBits = (doubleBytes ? 16 : 8) - colorBits;
 			colorMask = (doubleBytes ? Math::UShortMax() : Math::UByteMax()) >> repeatBits;
 		}
 		else {
-			colorBits = GetBitCount2(colors.Size());
+			colorBits = GetBitCount2(colors.Length());
 			segments = (doubleBytes ? 16 : 8) / colorBits;
 		}
 
 		UShort backID = doubleBytes ? data.Read<UShort>(Endian::Big) : data.Read<UByte>(Endian::Big);
 		ColorRGBA backColor = colors[backID];
 
-		for (UInt i = 0; i < pixel.pixels.Size(); i++) {
+		for (UInt i = 0; i < pixel.pixels.Length(); i++) {
 			pixel.pixels[i] = backColor;
 		}
 
@@ -453,7 +453,7 @@ namespace Boxx {
 					ColorRGBA rgba = colors[colorId];
 
 					for (UInt u = 0; u < repeatCount; u++) {
-						if (p >= pixel.pixels.Size())
+						if (p >= pixel.pixels.Length())
 							throw PixelLoadError("Pixel position is not inside the image");
 
 						pixel.pixels[p] = rgba;
@@ -472,7 +472,7 @@ namespace Boxx {
 					UShort color = doubleBytes ? data.Read<UShort>(Endian::Big) : data.Read<UByte>(Endian::Big);
 
 					for (UShort u = 0; u < segments && i < count; u++) {
-						if (p >= pixel.pixels.Size())
+						if (p >= pixel.pixels.Length())
 							throw PixelLoadError("Pixel position is not inside the image");
 
 						UShort colorId = color & colorMask;
@@ -501,7 +501,7 @@ namespace Boxx {
 	inline void Pixel::EncodeDefault(const List<ColorRGBA>& colors, const Array<UShort>& colorIDs, Buffer& data, const Format format) {
 		bool doubleBytes = (format & Format::DoubleBytes) != Format::None;
 
-		UByte colorBits = GetBitCount2(colors.Size());
+		UByte colorBits = GetBitCount2(colors.Count());
 		UByte segments = (doubleBytes ? 16 : 8) / colorBits;
 
 		UShort segment = 0;
@@ -538,7 +538,7 @@ namespace Boxx {
 	inline void Pixel::EncodeRepeat(const List<ColorRGBA>& colors, const Array<UShort>& colorIDs, Buffer& data, const Format format) {
 		bool doubleBytes = (format & Format::DoubleBytes) != Format::None;
 
-		UByte colorBits = GetBitCount(colors.Size());
+		UByte colorBits = GetBitCount(colors.Count());
 		UByte repeatBits = (doubleBytes ? 16 : 8) - colorBits;
 		UShort repeatMax = (UShort)1 << repeatBits;
 
@@ -580,19 +580,19 @@ namespace Boxx {
 		bool doubleSize = (format & Format::DoubleSize) != Format::None;
 		bool transpose = (format & Format::Transpose) != Format::None;
 
-		UByte colorBits = GetBitCount2(colors.Size());
+		UByte colorBits = GetBitCount2(colors.Count());
 		UByte segments = (doubleBytes ? 16 : 8) / colorBits;
 
 		UInt maxColors = doubleBytes ? Math::UShortMax() : Math::UByteMax();
 		UInt backMax = 3 * segments;
 
-		for (UInt i = 0; i < colorIDs.Size(); i++) {
+		for (UInt i = 0; i < colorIDs.Length(); i++) {
 			if (colorIDs[i] != backID) {
 				UInt pos = i;
 				List<UShort> colorList;
 				UInt backCount = 0;
 
-				for (; i < colorIDs.Size(); i++) {
+				for (; i < colorIDs.Length(); i++) {
 					if (colorIDs[i] == backID) {
 						backCount++;
 
@@ -606,7 +606,7 @@ namespace Boxx {
 
 					colorList.Add(colorIDs[i]);
 
-					if (colorList.Size() >= maxColors) 
+					if (colorList.Count() >= maxColors) 
 						break;
 				}
 
@@ -614,9 +614,9 @@ namespace Boxx {
 					colorList.RemoveLast();
 
 				if (doubleBytes)
-					data.Write<UShort>((UShort)colorList.Size(), Endian::Big);
+					data.Write<UShort>((UShort)colorList.Count(), Endian::Big);
 				else
-					data.Write<UByte>((UByte)colorList.Size(), Endian::Big);
+					data.Write<UByte>((UByte)colorList.Count(), Endian::Big);
 
 				UShort x = transpose ? pos / pixel.width : pos % pixel.width;
 				UShort y = transpose ? pos % pixel.width : pos / pixel.width;
@@ -647,7 +647,7 @@ namespace Boxx {
 		bool doubleSize = (format & Format::DoubleSize) != Format::None;
 		bool transpose = (format & Format::Transpose) != Format::None;
 
-		UByte colorBits = GetBitCount(colors.Size());
+		UByte colorBits = GetBitCount(colors.Count());
 
 		UInt maxColors = doubleBytes ? Math::UShortMax() : Math::UByteMax();
 		UInt maxRepeat = (1 << ((doubleBytes ? 16 : 8) - colorBits));
@@ -658,7 +658,7 @@ namespace Boxx {
 			UShort id;
 		};
 
-		for (UInt i = 0; i < colorIDs.Size(); i++) {
+		for (UInt i = 0; i < colorIDs.Length(); i++) {
 			if (colorIDs[i] != backID) {
 				UInt pos = i;
 				List<RepeatColor> repeatColors;
@@ -667,7 +667,7 @@ namespace Boxx {
 				currentColor.count = 1;
 				currentColor.id = colorIDs[i];
 
-				for (i++; i < colorIDs.Size(); i++) {
+				for (i++; i < colorIDs.Length(); i++) {
 					if (currentColor.count > 0 && colorIDs[i] == currentColor.id) {
 						currentColor.count++;
 
@@ -683,7 +683,7 @@ namespace Boxx {
 						if (currentColor.count == maxRepeat) {
 							repeatColors.Add(currentColor);
 
-							if (repeatColors.Size() == maxColors) break;
+							if (repeatColors.Count() == maxColors) break;
 
 							currentColor.count = 0;
 						}
@@ -692,7 +692,7 @@ namespace Boxx {
 						if (currentColor.count > 0)
 							repeatColors.Add(currentColor);
 
-						if (repeatColors.Size() == maxColors) break;
+						if (repeatColors.Count() == maxColors) break;
 
 						currentColor.count = 1;
 						currentColor.id = colorIDs[i];
@@ -702,7 +702,7 @@ namespace Boxx {
 				}
 
 				if (currentColor.count > 0) {
-					if (repeatColors.Size() == maxColors) {
+					if (repeatColors.Count() == maxColors) {
 						i--;
 					}
 					else {
@@ -714,9 +714,9 @@ namespace Boxx {
 					repeatColors.RemoveLast();
 
 				if (doubleBytes)
-					data.Write<UShort>(repeatColors.Size(), Endian::Big);
+					data.Write<UShort>(repeatColors.Count(), Endian::Big);
 				else
-					data.Write<UByte>(repeatColors.Size(), Endian::Big);
+					data.Write<UByte>(repeatColors.Count(), Endian::Big);
 
 				UShort x = transpose ? pos / pixel.height : pos % pixel.width;
 				UShort y = transpose ? pos % pixel.height : pos / pixel.width;
@@ -754,9 +754,9 @@ namespace Boxx {
 	inline void Pixel::EncodeBackground(const Pixel& pixel, const List<ColorRGBA>& colors, const Array<UShort>& colorIDs, Buffer& data, const Format format) {
 		bool doubleBytes = (format & Format::DoubleBytes) != Format::None;
 
-		Array<UInt> colorCount = Array<UInt>(colors.Size());
+		Array<UInt> colorCount = Array<UInt>(colors.Count());
 
-		for (UShort i = 0; i < colorCount.Size(); i++) {
+		for (UShort i = 0; i < colorCount.Length(); i++) {
 			colorCount[i] = 0;
 		}
 
@@ -767,7 +767,7 @@ namespace Boxx {
 		UInt best = 0;
 		UShort backID = 0;
 
-		for (UInt i = 0; i < colorCount.Size(); i++) {
+		for (UInt i = 0; i < colorCount.Length(); i++) {
 			if (colorCount[i] > best) {
 				best = colorCount[i];
 				backID = i;
@@ -804,10 +804,10 @@ namespace Boxx {
 		}
 
 		if ((format & Format::DoubleBytes) != Format::None) {
-			data.Write<UShort>(colors.Size() - 1, Endian::Big);
+			data.Write<UShort>(colors.Count() - 1, Endian::Big);
 		}
 		else {
-			data.Write<UByte>((UByte)(colors.Size() - 1), Endian::Big);
+			data.Write<UByte>((UByte)(colors.Count() - 1), Endian::Big);
 		}
 
 		bool alphaFormat = (format & Format::Alpha) != Format::None;
@@ -845,16 +845,16 @@ namespace Boxx {
 			} 
 		}
 
-		Buffer data = Buffer(pixel.pixels.Size());
+		Buffer data = Buffer(pixel.pixels.Length());
 		Format bestFormat = Format::None;
 		Set<Format> formats = GetAllFormats();
 
 		Tuple<List<ColorRGBA>, Array<UShort>> colors = pixel.GetColorIDs();
 		Pixel transposePixel = Pixel(pixel.height, pixel.width, pixel.pixels);
-		Array<UShort> transposeIDs = Array<UShort>(colors.value2.Size());
+		Array<UShort> transposeIDs = Array<UShort>(colors.value2.Length());
 
 		if (format.HasValue()) {
-			if (colors.value1.Size() > Math::UByteMax()) {
+			if (colors.value1.Count() > Math::UByteMax()) {
 				if ((*format & Format::DoubleBytes) == Format::None) {
 					throw PixelEncodeError("Format should have double bytes for images with more than 256 colors");
 				}
@@ -874,12 +874,12 @@ namespace Boxx {
 				}
 
 				if ((format & Format::DoubleBytes) == Format::None) {
-					if (colors.value1.Size() > Math::UByteMax()) {
+					if (colors.value1.Count() > Math::UByteMax()) {
 						continue;
 					}
 				}
 
-				Buffer formatData = Buffer(pixel.pixels.Size());
+				Buffer formatData = Buffer(pixel.pixels.Length());
 
 				EncodeHeader(colors.value1, pixel, formatData, format);
 
@@ -897,7 +897,7 @@ namespace Boxx {
 			}
 		}
 		else {
-			Buffer formatData = Buffer(pixel.pixels.Size());
+			Buffer formatData = Buffer(pixel.pixels.Length());
 
 			EncodeHeader(colors.value1, pixel, formatData, *format);
 
@@ -976,22 +976,22 @@ namespace Boxx {
 			if (color.a != 0) colorSet.Add(color);
 		}
 
-		List<ColorRGBA> colors{colorSet.Size()};
-		Map<ColorRGBA, UShort> colorMap{colorSet.Size()};
+		List<ColorRGBA> colors{colorSet.Count()};
+		Map<ColorRGBA, UShort> colorMap{colorSet.Count()};
 
 		colors.Add(transparent);
 		colorMap.Add(transparent, 0);
 
 		for (const ColorRGBA& color : colorSet) {
 			if (color.a != 0) {
-				colorMap.Add(color, colors.Size());
+				colorMap.Add(color, colors.Count());
 				colors.Add(color);
 			}
 		}
 
-		Array<UShort> colorIDs = Array<UShort>(pixels.Size());
+		Array<UShort> colorIDs = Array<UShort>(pixels.Length());
 
-		for (UInt i = 0; i < pixels.Size(); i++) {
+		for (UInt i = 0; i < pixels.Length(); i++) {
 			if (pixels[i].a == 0) {
 				colorIDs[i] = colorMap[transparent];
 			}

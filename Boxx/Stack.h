@@ -47,8 +47,8 @@ namespace Boxx {
 		/// Remove and return the item on the top of the stack.
 		T& Pop();
 
-		/// Get the current size of the stack.
-		UInt Size() const;
+		/// Get the current item count of the stack.
+		UInt Count() const;
 
 		/// Get the current capacity of the stack.
 		UInt Capacity() const;
@@ -106,7 +106,7 @@ namespace Boxx {
 
 	template <class T>
 	inline void Stack<T>::Set(const T& value) {
-		stack[stack.Size() - 1] = value;
+		stack[stack.Count() - 1] = value;
 	}
 
 	template <class T>
@@ -122,13 +122,13 @@ namespace Boxx {
 	template <class T>
 	inline T& Stack<T>::Pop() {
 		T& value = stack.Last();
-		stack.RemoveAt(stack.Size() - 1);
+		stack.RemoveAt(stack.Count() - 1);
 		return value;
 	}
 
 	template <class T>
-	inline UInt Stack<T>::Size() const {
-		return stack.Size();
+	inline UInt Stack<T>::Count() const {
+		return stack.Count();
 	}
 
 	template <class T>

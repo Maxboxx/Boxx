@@ -137,7 +137,7 @@ namespace Boxx {
 				}
 
 				case DragonfruitDescType::Text: {
-					if (this->text.Size() > 0) {
+					if (this->text.Length() > 0) {
 						this->text += " " + text;
 					}
 					else {
@@ -153,7 +153,7 @@ namespace Boxx {
 
 					List<char> chars;
 
-					for (UInt i = 0; i < text.Size(); i++) {
+					for (UInt i = 0; i < text.Length(); i++) {
 						if (text[i] == '\\') {
 							escaped = !escaped;
 						}
@@ -162,7 +162,7 @@ namespace Boxx {
 							segments.Last().text = String(chars);
 							chars.Clear();
 						}
-						else if (i == text.Size() - 1 || (!escaped && text[i] == '{')) {
+						else if (i == text.Length() - 1 || (!escaped && text[i] == '{')) {
 							if (text[i] != '{') chars.Add(text[i]);
 
 							if (!chars.IsEmpty()) {
@@ -463,7 +463,7 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 		/// Generates the start of a heading section.
 		///[Arg] heading: The heading title.
 		virtual String HeadingStart(const String& heading) const {
-			if (heading.Size() > 0) {
+			if (heading.Length() > 0) {
 				return "<heading-section><heading-title>" + EscapeHTML(heading) + "</heading-title><ul>";
 			}
 			else {
@@ -487,7 +487,7 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 				case DragonfruitType::Summary: {
 					StringBuilder str;
 					
-					if (item.block.Size() > 0) {
+					if (item.block.Length() > 0) {
 						str += "<li><a href='";
 						str += EscapeHTML(item.block.Lower());
 						str += ".";
@@ -500,7 +500,7 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 						str += "'><summary-item>";
 					}
 
-					if (item.title.Size() > 0) {
+					if (item.title.Length() > 0) {
 						str += "<summary-title>";
 						str += EscapeHTML(item.title);
 						str += "</summary-title>";
@@ -508,7 +508,7 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 					else if (!item.code.IsEmpty()) {
 						str += "<pre>";
 
-						for (UInt i = 0; i < item.code.Size(); i++) {
+						for (UInt i = 0; i < item.code.Count(); i++) {
 							if (i > 0) str += "\n";
 							str += EscapeHTML(item.code[i]);
 						}
@@ -561,13 +561,13 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 				str += "<summary-content>";
 			}
 
-			if (section.title.Size() > 0) {
+			if (section.title.Length() > 0) {
 				str += "<summary-title>";
 				str += EscapeHTML(section.title);
 				str += "</summary-title>";
 			}
 
-			if (section.file.Size() > 0 && section.block.Size() > 0) {
+			if (section.file.Length() > 0 && section.block.Length() > 0) {
 				str += "<summary-file>";
 				str += section.file;
 				str += "</summary-file>";
@@ -575,7 +575,7 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 
 			str += "<pre>";
 
-			for (UInt i = 0; i < section.code.Size(); i++) {
+			for (UInt i = 0; i < section.code.Count(); i++) {
 				if (i > 0) str += "\n";
 				str += EscapeHTML(section.code[i]);
 			}
@@ -618,7 +618,7 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 		virtual String Value(const Dragonfruit& section) const {
 			StringBuilder str = "<value-section>";
 			
-			if (section.title.Size() > 0) {
+			if (section.title.Length() > 0) {
 				str += "<code class='value'>";
 				str += EscapeHTML(section.title);
 				str += "</code>";
@@ -726,7 +726,7 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 		}
 
 		bool MergeSections(List<Dragonfruit>& sections) {
-			for (Int i = sections.Size() - 1; i >= 0; i--) {
+			for (Int i = sections.Count() - 1; i >= 0; i--) {
 				if (sections[i].type == current.type && sections[i].title == current.title) {
 					for (const Dragonfruit& section : current.sections) {
 						sections[i].sections.Add(section);
@@ -747,7 +747,7 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 
 				sections.Last().sections.Add(current);
 
-				if (sections.Last().type == DragonfruitType::Heading && sections.Last().block.Size() > 0) {
+				if (sections.Last().type == DragonfruitType::Heading && sections.Last().block.Length() > 0) {
 					sections.Last().block = "";
 					current = sections.Last();
 					sections.RemoveLast();
@@ -778,7 +778,7 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 			EndCategory();
 
 			if (current.type == DragonfruitType::Summary && !current.code.IsEmpty()) {
-				if (!ignoreBlock && current.block.Size() != 0) {
+				if (!ignoreBlock && current.block.Length() != 0) {
 					sections.Add(current);
 					indents.Add(currentIndent);
 					currentIndent = 0;
@@ -799,11 +799,11 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 			if (current.type == DragonfruitType::Summary && !current.code.IsEmpty()) {
 				String code = current.code[0];
 
-				for (UInt i = 1; i < current.code.Size(); i++) {
+				for (UInt i = 1; i < current.code.Count(); i++) {
 					code += "\n" + current.code[i];
 				}
 
-				if (current.block.Size() == 0) {
+				if (current.block.Length() == 0) {
 					for (const Regex& pattern : info.blockPatterns) {
 						if (Optional<Match> match = pattern.Match(code)) {
 							if (!match->groups.IsEmpty()) {
@@ -814,7 +814,7 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 					}
 				}
 
-				if (current.title.Size() == 0) {
+				if (current.title.Length() == 0) {
 					for (const Regex& pattern : info.titlePatterns) {
 						if (Optional<Match> match = pattern.Match(code)) {
 							if (!match->groups.IsEmpty()) {
@@ -842,7 +842,7 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 					}
 				}
 
-				if (!sections.IsEmpty() && sections.Last().type == DragonfruitType::Summary && sections.Last().block.Size() > 0) {
+				if (!sections.IsEmpty() && sections.Last().type == DragonfruitType::Summary && sections.Last().block.Length() > 0) {
 					for (const Pair<String, Regex>& pattern : info.blockHeadingPatterns) {
 						if (Optional<Match> match = pattern.value.Match(code)) {
 							Dragonfruit heading;
@@ -906,7 +906,7 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 		void MergeHeading(const UInt index) {
 			Dragonfruit current = completed[index];
 
-			for (UInt i = 0; i < completed.Size(); i++) {
+			for (UInt i = 0; i < completed.Count(); i++) {
 				if (i == index) continue;
 
 				if (completed[i].type == DragonfruitType::Heading && completed[i].title == current.title) {
@@ -921,13 +921,13 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 		}
 
 		void MergeNamespace(List<Dragonfruit>& sections) {
-			Dragonfruit current = sections[sections.Size() - 1];
+			Dragonfruit current = sections[sections.Count() - 1];
 
-			for (UInt i = 0; i < sections.Size() - 1; i++) {
+			for (UInt i = 0; i < sections.Count() - 1; i++) {
 				if (sections[i].type == DragonfruitType::Namespace && sections[i].title == current.title) {
 					sections.RemoveLast();
 
-					for (UInt u = 0; u < current.sections.Size(); u++) {
+					for (UInt u = 0; u < current.sections.Count(); u++) {
 						sections[i].sections.Add(current.sections[u]);
 
 						if (current.sections[i].type == DragonfruitType::Namespace) {
@@ -941,11 +941,11 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 		}
 
 		void MergeLast() {
-			if (completed.Size() <= 1) return;
+			if (completed.Count() <= 1) return;
 
 			switch (completed.Last().type) {
 				case DragonfruitType::Heading: {
-					MergeHeading(completed.Size() - 1);
+					MergeHeading(completed.Count() - 1);
 					break;
 				}
 
@@ -999,7 +999,7 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 	inline void Dragonfruit::GenerateHTML(const String& directory, const DragonfruitBuilder& builder) const {
 		String dir = directory;
 
-		if (dir[dir.Size() + 1] != '/' && dir[dir.Size() + 1] != '\\') {
+		if (dir[dir.Length() + 1] != '/' && dir[dir.Length() + 1] != '\\') {
 			dir += '/';
 		}
 
@@ -1062,7 +1062,7 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 					hasItems = true;
 				}
 
-				file.Write(builder.Item(section, displayedSections.Size()));
+				file.Write(builder.Item(section, displayedSections.Count()));
 				displayedSections.Add(section);
 			}
 		}
@@ -1076,7 +1076,7 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 				file.Write(builder.HeadingStart(section.title));
 
 				for (const Dragonfruit& s : section.sections) {
-					file.Write(builder.Item(s, displayedSections.Size()));
+					file.Write(builder.Item(s, displayedSections.Count()));
 					displayedSections.Add(s);
 				}
 
@@ -1093,7 +1093,7 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 					hasNamespaces = true;
 				}
 
-				file.Write(builder.Item(section, displayedSections.Size()));
+				file.Write(builder.Item(section, displayedSections.Count()));
 				displayedSections.Add(section);
 			}
 		}
@@ -1104,12 +1104,12 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 
 		file.Write(builder.HeadingListEnd());
 
-		for (UInt i = 0; i < displayedSections.Size(); i++) {
-			if (displayedSections[i].type != DragonfruitType::Namespace && displayedSections[i].block.Size() == 0) {
+		for (UInt i = 0; i < displayedSections.Count(); i++) {
+			if (displayedSections[i].type != DragonfruitType::Namespace && displayedSections[i].block.Length() == 0) {
 				file.Write(builder.Summary(displayedSections[i], i));
 			}
 			
-			if (displayedSections[i].type == DragonfruitType::Namespace || displayedSections[i].block.Size() > 0) {
+			if (displayedSections[i].type == DragonfruitType::Namespace || displayedSections[i].block.Length() > 0) {
 				displayedSections[i].GenerateHTMLFile(builder, dir, rootDir);
 			}
 		}
@@ -1120,14 +1120,14 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 	}
 
 	inline Dragonfruit Dragonfruit::Generate(const String& directory, const DragonfruitInfo& info, const String& dir) {
-		String currentDir = directory[directory.Size() - 1] == '/' || directory[directory.Size() - 1] == '\\' ? directory : directory + '/';
+		String currentDir = directory[directory.Length() - 1] == '/' || directory[directory.Length() - 1] == '\\' ? directory : directory + '/';
 
 		Dragonfruit doc;
 		doc.type = DragonfruitType::Main;
 
 		for (const String& file : System::GetFilesInDirectory(currentDir)) {
 			for (const String& ext : info.extensions) {
-				if (file.Size() > ext.Size() && file.Find('.' + ext, file.Size() - ext.Size() - 1)) {
+				if (file.Length() > ext.Length() && file.Find('.' + ext, file.Length() - ext.Length() - 1)) {
 					doc.Merge(GenerateFromFile(currentDir + file, info, dir + file));
 					break;
 				}
@@ -1197,7 +1197,7 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 			if (match && match->length > 0) {
 				DocComment comment;
 
-				if (match->groups.Size() == 2) {
+				if (match->groups.Count() == 2) {
 					comment.commentType = match->groups[0];
 					comment.content     = match->groups[1].Trim();
 				}
@@ -1254,7 +1254,7 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 				}
 			}
 
-			if (match->groups.Size() == 3) {
+			if (match->groups.Count() == 3) {
 				comment.commentType = match->groups[1];
 				comment.content     = match->groups[2].Trim();
 			}
@@ -1277,7 +1277,7 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 			}
 		}
 
-		if (comment.commentType.Size() > 0) {
+		if (comment.commentType.Length() > 0) {
 			if (ParseTitle(comment, info, docInfo)) return;
 			if (ParseBlock(comment, info, docInfo)) return;
 			if (ParseNamespace(comment, info, docInfo)) return;
@@ -1293,10 +1293,10 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 			DocComment c = comment;
 
 			if (Optional<Match> match = itemPattern.Match(c.commentType)) {
-				items = match->groups.Size() - 1;
-				c.commentType = c.commentType.Sub(match->groups[0].Size());
+				items = match->groups.Count() - 1;
+				c.commentType = c.commentType.Sub(match->groups[0].Length());
 
-				if (c.commentType.Size() == 0) {
+				if (c.commentType.Length() == 0) {
 					if (ParseItem(c, info, docInfo, items)) return;
 				}
 			}
@@ -1328,7 +1328,7 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 			info.EndCategory();
 
 			if (info.current.type != DragonfruitType::None) {
-				info.current.block = comment.content.Size() == 0 ? String("_") : comment.content.Split(":")[0].Trim();
+				info.current.block = comment.content.Length() == 0 ? String("_") : comment.content.Split(":")[0].Trim();
 			}
 			else {
 				info.EndBlock();
@@ -1352,7 +1352,7 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 				info.current.type = DragonfruitType::Namespace;
 				info.current.title = name.Trim();
 
-				if (info.current.title.Size() > 0) {
+				if (info.current.title.Length() > 0) {
 					info.sections.Add(info.current);
 				}
 
@@ -1372,7 +1372,7 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 			info.current.type = DragonfruitType::Heading;
 			info.current.title = comment.content;
 
-			if (info.current.title.Size() > 0) {
+			if (info.current.title.Length() > 0) {
 				info.sections.Add(info.current);
 			}
 
@@ -1510,7 +1510,7 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 			Optional<Match> match = Regex::Match("^%s*(%w+){%s*%:%s*(%w+)}?%n*$", comment.content);
 
 			if (match) {
-				String label = match->groups.Size() > 1 ? match->groups[1] : String("");
+				String label = match->groups.Count() > 1 ? match->groups[1] : String("");
 				List<DocComment> comments;
 
 				if (!info.imported.Contains(match->groups[0], comments)) {
@@ -1518,7 +1518,7 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 					info.imported.Add(match->groups[0], comments);
 				}
 
-				bool foundLabel = label.Size() == 0;
+				bool foundLabel = label.Length() == 0;
 
 				for (const DocComment& comment : comments) {
 					if (foundLabel) {
@@ -1544,7 +1544,7 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 
 		if (comment.commentType == "S" || comment.commentType == "Settings") {
 			if (Optional<Match> match = settingsPattern.Match(comment.content)) {
-				for (UInt i = 0; i < match->groups.Size(); i += 2) {
+				for (UInt i = 0; i < match->groups.Count(); i += 2) {
 					if (match->groups[i] == "block") {
 						if (match->groups[i + 1] == "manual") {
 							docInfo.blockMode = DragonfruitBlockMode::Manual;

@@ -37,8 +37,8 @@ namespace Boxx {
 		/// Copies the {StringBuilder}.
 		StringBuilder Copy() const;
 
-		/// Gets the size of the string.
-		UInt Size() const;
+		/// Gets the current length of the string.
+		UInt Length() const;
 
 		///[Heading] Operators
 
@@ -93,8 +93,8 @@ namespace Boxx {
 		return String(string);
 	}
 
-	inline UInt StringBuilder::Size() const {
-		return string.Size();
+	inline UInt StringBuilder::Length() const {
+		return string.Count();
 	}
 
 	inline StringBuilder StringBuilder::Copy() const {

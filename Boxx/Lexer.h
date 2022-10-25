@@ -61,14 +61,14 @@ namespace Boxx {
 		static Regex whiteSpace = Regex("^%n*");
 		static Regex undefinedToken = Regex("^~%n*");
 
-		if (code.Size() == 0) return TokenList<T>();
+		if (code.Length() == 0) return TokenList<T>();
 
 		String match = whiteSpace.Match(code)->match;
 		UInt line = 1 + Lines(match);
-		UInt i = match.Size();
+		UInt i = match.Length();
 		List<Token<T>> tokens;
 
-		while (i < code.Size()) {
+		while (i < code.Length()) {
 			bool found = false;
 
 			for (const TokenPattern<T>& pattern : patterns) {
@@ -98,9 +98,9 @@ namespace Boxx {
 				}
 			}
 
-			if (i < code.Size()) {
+			if (i < code.Length()) {
 				const String match = whiteSpace.Match(code, i)->match;
-				i += match.Size();
+				i += match.Length();
 				line += Lines(match);
 			}
 		}

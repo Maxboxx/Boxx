@@ -548,7 +548,7 @@ namespace Boxx {
 
 			static Set<char> GetPunct() {
 				const String p = "[!\"#$%&'()*+,./:;<=>?@\\^`{|}~-]";
-				Set<char> set = Set<char>(p.Size());
+				Set<char> set = Set<char>(p.Length());
 
 				for (const char c : p)
 					set.Add(c);
@@ -589,7 +589,7 @@ namespace Boxx {
 	};
 
 	inline char Regex::Pattern::operator[](const UInt i) const {
-		if (i >= pattern.Size()) throw RegexPatternError("Unexpected end of pattern");
+		if (i >= pattern.Length()) throw RegexPatternError("Unexpected end of pattern");
 		return pattern[i];
 	}
 	
@@ -625,7 +625,7 @@ namespace Boxx {
 		MatchInfo info;
 		info.str   = (const char*)str;
 		info.start = (const char*)str + pos;
-		info.end   = (const char*)str + str.Size();
+		info.end   = (const char*)str + str.Length();
 		info.matchStart = pos;
 
 		if (root->Match(info.start, info)) {
@@ -678,7 +678,7 @@ namespace Boxx {
 	}
 
 	inline String Regex::Escape(const String& str) {
-		List<char> chars{str.Size()};
+		List<char> chars{str.Length()};
 
 		for (const char c : str) {
 			if (MetaChar::IsMetaChar(c)) {
@@ -705,7 +705,7 @@ namespace Boxx {
 		Pointer<RootNode> root = new RootNode();
 		root->next = ParseExpression(pattern, index).value1;
 
-		if (index < pattern.pattern.Size()) throw RegexPatternError("Unexpected character '" + String(pattern[index]) + "'"); 
+		if (index < pattern.pattern.Length()) throw RegexPatternError("Unexpected character '" + String(pattern[index]) + "'"); 
 
 		if (!root->next) root->next = new LeafNode();
 
@@ -720,13 +720,13 @@ namespace Boxx {
 		while (node.value1) {
 			nodes.Add(node);
 
-			if (index >= pattern.pattern.Size() || pattern[index] != MetaChar::select) break;
+			if (index >= pattern.pattern.Length() || pattern[index] != MetaChar::select) break;
 
 			index++;
 			node = ParseRawExpression(pattern, index);
 		}
 
-		if (nodes.Size() == 1) return nodes[0];
+		if (nodes.Count() == 1) return nodes[0];
 
 		Pointer<EmptyNode> empty = new EmptyNode();
 		empty->next = new LeafNode();
@@ -819,7 +819,7 @@ namespace Boxx {
 	}
 
 	inline Regex::NodeLeaf Regex::ParseElementMatch(const Pattern& pattern, UInt& index) {
-		if (index >= pattern.pattern.Size() || pattern[index] != MetaChar::element) {
+		if (index >= pattern.pattern.Length() || pattern[index] != MetaChar::element) {
 			return NodeLeaf(nullptr, nullptr);
 		}
 
@@ -853,7 +853,7 @@ namespace Boxx {
 			return NodeLeaf(node, node);
 		}
 
-		if (index >= pattern.pattern.Size()) {
+		if (index >= pattern.pattern.Length()) {
 			return NodeLeaf(nullptr, nullptr);
 		}
 
@@ -916,7 +916,7 @@ namespace Boxx {
 	}
 
 	inline Optional<Tuple<UInt, UInt, bool>> Regex::ParseQuantifier(const Pattern& pattern, UInt& index) {
-		if (index >= pattern.pattern.Size()) return nullptr;
+		if (index >= pattern.pattern.Length()) return nullptr;
 
 		UInt min = 0, max = 0;
 		bool many = true;
@@ -956,7 +956,7 @@ namespace Boxx {
 			min = 0;
 			max = Math::UIntMax();
 
-			if (index >= pattern.pattern.Size()) {
+			if (index >= pattern.pattern.Length()) {
 				throw RegexPatternError("Quantifier range expected after '" + String(MetaChar::quantOpen) + "'");
 			}
 
@@ -973,7 +973,7 @@ namespace Boxx {
 			else if (Optional<UInt> num = ParseInt(pattern, index)) {
 				min = *num;
 
-				if (index < pattern.pattern.Size() && pattern[index] == MetaChar::quantRange) {
+				if (index < pattern.pattern.Length() && pattern[index] == MetaChar::quantRange) {
 					index++;
 
 					if (Optional<UInt> n = ParseInt(pattern, index)) {
@@ -992,7 +992,7 @@ namespace Boxx {
 				throw RegexPatternError("Quantifier range is out of order");
 			}
 
-			if (index >= pattern.pattern.Size()) {
+			if (index >= pattern.pattern.Length()) {
 				throw RegexPatternError("'" + String(MetaChar::quantClose) + "' expected to close quantifier");
 			}
 
@@ -1001,7 +1001,7 @@ namespace Boxx {
 				index++;
 			}
 
-			if (index >= pattern.pattern.Size() || pattern[index] != MetaChar::quantClose) {
+			if (index >= pattern.pattern.Length() || pattern[index] != MetaChar::quantClose) {
 				throw RegexPatternError("'" + String(MetaChar::quantClose) + "' expected to close quantifier");
 			}
 
@@ -1020,7 +1020,7 @@ namespace Boxx {
 		Optional<char> start = ParseChar(pattern, index);
 		if (!start) return nullptr;
 
-		if (index >= pattern.pattern.Size()) {
+		if (index >= pattern.pattern.Length()) {
 			index = startIndex;
 			return nullptr;
 		}
@@ -1054,7 +1054,7 @@ namespace Boxx {
 
 		if (str.IsEmpty()) return nullptr;
 
-		if (str.Size() > 1) {
+		if (str.Count() > 1) {
 			Pointer<StringNode> node = new StringNode();
 			node->string = String(str);
 			return node;
@@ -1301,12 +1301,12 @@ namespace Boxx {
 	}
 
 	inline Optional<char> Regex::ParseChar(const Pattern& pattern, UInt& index, const bool skipPost) {
-		if (index >= pattern.pattern.Size()) return nullptr;
+		if (index >= pattern.pattern.Length()) return nullptr;
 
 		char c = pattern[index];
 
 		if (c == MetaChar::escape) {
-			if (index + 1 >= pattern.pattern.Size()) return nullptr;
+			if (index + 1 >= pattern.pattern.Length()) return nullptr;
 			c = pattern[index + 1];
 			if (MetaChar::IsReservedEscape(c)) return nullptr;
 			index++;
@@ -1314,7 +1314,7 @@ namespace Boxx {
 		else if (MetaChar::IsMetaChar(c)) {
 			return nullptr;
 		}
-		else if (!skipPost && (index + 1 < pattern.pattern.Size() && MetaChar::IsPostChar(pattern[index + 1]))) {
+		else if (!skipPost && (index + 1 < pattern.pattern.Length() && MetaChar::IsPostChar(pattern[index + 1]))) {
 			return nullptr;
 		}
 
@@ -1323,12 +1323,12 @@ namespace Boxx {
 	}
 
 	inline Optional<char> Regex::ParseSetChar(const Pattern& pattern, UInt& index) {
-		if (index >= pattern.pattern.Size()) return nullptr;
+		if (index >= pattern.pattern.Length()) return nullptr;
 
 		char c = pattern[index];
 
 		if (c == MetaChar::escape) {
-			if (index + 1 >= pattern.pattern.Size()) return nullptr;
+			if (index + 1 >= pattern.pattern.Length()) return nullptr;
 			c = pattern[index + 1];
 			if (MetaChar::IsReservedSetEscape(c)) return nullptr;
 			index++;
@@ -1342,13 +1342,13 @@ namespace Boxx {
 	}
 
 	inline Optional<UInt> Regex::ParseInt(const Pattern& pattern, UInt& index) {
-		if (index >= pattern.pattern.Size()) return nullptr;
+		if (index >= pattern.pattern.Length()) return nullptr;
 		
 		UInt startIndex = index;
 
 		while ('0' <= pattern[index] && pattern[index] <= '9') {
 			index++;
-			if (index >= pattern.pattern.Size()) break;
+			if (index >= pattern.pattern.Length()) break;
 		}
 
 		if (startIndex == index) return nullptr;
@@ -1380,13 +1380,13 @@ namespace Boxx {
 	}
 
 	inline const char* Regex::StringNode::Match(const char* str, MatchInfo& info) {
-		if ((UInt)(info.end - str) < string.Size()) {
+		if ((UInt)(info.end - str) < string.Length()) {
 			return nullptr;
 		}
 
 		const char* c = str;
 
-		for (UInt i = 0; i < string.Size(); i++, c++) {
+		for (UInt i = 0; i < string.Length(); i++, c++) {
 			if (*c != string[i]) return nullptr;
 		}
 
@@ -1535,16 +1535,16 @@ namespace Boxx {
 	}
 
 	inline const char* Regex::InverseNode::Match(const char* str, MatchInfo& info) {
-		const UInt groupSize   = info.groups.Size();
-		const UInt elementSize = info.elements.Size();
+		const UInt groupSize   = info.groups.Count();
+		const UInt elementSize = info.elements.Count();
 
 		if (content->Match(str, info)) {
-			if (groupSize < info.groups.Size()) {
-				info.groups.RemoveAt(groupSize, info.groups.Size() - groupSize);
+			if (groupSize < info.groups.Count()) {
+				info.groups.RemoveAt(groupSize, info.groups.Count() - groupSize);
 			}
 
-			if (elementSize < info.elements.Size()) {
-				info.elements.RemoveAt(elementSize, info.elements.Size() - elementSize);
+			if (elementSize < info.elements.Count()) {
+				info.elements.RemoveAt(elementSize, info.elements.Count() - elementSize);
 			}
 
 			return nullptr;
@@ -1584,7 +1584,7 @@ namespace Boxx {
 		UInt current = 0;
 
 		if (!isHidden) {
-			current = info.groups.Size();
+			current = info.groups.Count();
 			info.groups.Add("");
 		}
 
@@ -1614,20 +1614,20 @@ namespace Boxx {
 	}
 
 	inline const char* Regex::SelectNode::Match(const char* str, MatchInfo& info) {
-		const UInt groupSize   = info.groups.Size();
-		const UInt elementSize = info.elements.Size();
+		const UInt groupSize   = info.groups.Count();
+		const UInt elementSize = info.elements.Count();
 
 		for (Node node : nodes) {
 			if (const char* c = node->Match(str, info)) {
 				return c;
 			}
 			else {
-				if (groupSize < info.groups.Size()) {
-					info.groups.RemoveAt(groupSize, info.groups.Size() - groupSize);
+				if (groupSize < info.groups.Count()) {
+					info.groups.RemoveAt(groupSize, info.groups.Count() - groupSize);
 				}
 
-				if (elementSize < info.elements.Size()) {
-					info.elements.RemoveAt(elementSize, info.elements.Size() - elementSize);
+				if (elementSize < info.elements.Count()) {
+					info.elements.RemoveAt(elementSize, info.elements.Count() - elementSize);
 				}
 			}
 		}
@@ -1725,7 +1725,7 @@ namespace Boxx {
 				}
 			}
 
-			while (starts.Size() > min) {
+			while (starts.Count() > min) {
 				if (str = next->Match(starts.Pop(), info)) {
 					return str;
 				}
@@ -1829,17 +1829,17 @@ namespace Boxx {
 	}
 
 	inline const char* Regex::ElementMatchNode::Match(const char* str, MatchInfo& info) {
-		if (index >= info.elements.Size()) return nullptr;
+		if (index >= info.elements.Count()) return nullptr;
 
 		const String element = info.elements[index];
 
-		if ((UInt)(info.end - element) < element.Size()) {
+		if ((UInt)(info.end - element) < element.Length()) {
 			return nullptr;
 		}
 
 		const char* c = str;
 
-		for (UInt i = 0; i < element.Size(); i++, c++) {
+		for (UInt i = 0; i < element.Length(); i++, c++) {
 			if (*c != element[i]) return nullptr;
 		}
 

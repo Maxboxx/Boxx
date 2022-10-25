@@ -61,8 +61,8 @@ namespace Boxx {
 		/// Checks if the map contains a specific key and assigns the value of that key to {value} if it exists.
 		bool Contains(const Key& key, Value& value) const;
 
-		/// Returns the current size of the map.
-		UInt Size() const;
+		/// Returns the current key count of the map.
+		UInt Count() const;
 
 		/// Returns the current capacity of the map.
 		UInt Capacity() const;
@@ -163,7 +163,7 @@ namespace Boxx {
 	template <class Key, class Value>
 	inline void Map<Key, Value>::Add(const Pair<Key, Value>& pair) {
 		int start = 0;
-		int end = values.Size();
+		int end = values.Count();
 		int i;
 
 		while (start != end) {
@@ -217,8 +217,8 @@ namespace Boxx {
 	}
 
 	template <class Key, class Value>
-	inline UInt Map<Key, Value>::Size() const {
-		return values.Size();
+	inline UInt Map<Key, Value>::Count() const {
+		return values.Count();
 	}
 
 	template <class Key, class Value>
@@ -275,7 +275,7 @@ namespace Boxx {
 	template <class Key, class Value>
 	inline UInt Map<Key, Value>::BinarySearch(const Key& key) const {
 		int start = 0;
-		int end = values.Size();
+		int end = values.Count();
 		int i;
 
 		while (start != end) {

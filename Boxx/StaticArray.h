@@ -39,8 +39,8 @@ namespace Boxx {
 
 		///[Heading] Methods
 
-		/// Returns the size of the array.
-		constexpr UInt Size() const;
+		/// Returns the length of the array.
+		constexpr UInt Length() const;
 
 		/// Returns an element at the end of the array.
 		///[Arg] pos: The position from the last element.
@@ -150,7 +150,7 @@ namespace Boxx {
 
 	template <class T, UInt S>
 	inline StaticArray<T, S>::StaticArray(const Array<T>& arr) {
-		if (S != arr.Size())
+		if (S != arr.Length())
 			throw ArraySizeError("Array size mismatch");
 
 		array = arr.array;
@@ -183,29 +183,29 @@ namespace Boxx {
 	}
 
 	template <class T, UInt S>
-	inline constexpr UInt StaticArray<T, S>::Size() const {
+	inline constexpr UInt StaticArray<T, S>::Length() const {
 		return S;
 	}
 
 	template <class T, UInt S>
 	inline T& StaticArray<T, S>::Last(const UInt pos) {
-		return array[Size() - pos - 1];
+		return array[Length() - pos - 1];
 	}
 
 	template <class T, UInt S>
 	inline const T& StaticArray<T, S>::Last(const UInt pos) const {
-		return array[Size() - pos - 1];
+		return array[Length() - pos - 1];
 	}
 
 	template <class T, UInt S>
 	inline StaticArray<T, S> StaticArray<T, S>::Copy() const {
 		StaticArray<T, S> arr;
 
-		T* const last = &arr.array[Size()];
+		T* const last = &arr.array[Length()];
 		T* source = array;
 
 		if (std::is_trivially_copyable<T>::value)
-			memmove(arr.array, array, sizeof(T) * Size());
+			memmove(arr.array, array, sizeof(T) * Length());
 		else for (T* dest = arr.array; dest != last; dest++, source++)
 			*dest = *source;
 

@@ -37,7 +37,7 @@ namespace Boxx {
 		///[Heading] Methods
 
 		/// Returns the number of items in the collection.
-		UInt Size() const;
+		UInt Count() const;
 
 		/// Returns the current capacity of the collection.
 		UInt Capacity() const;
@@ -162,7 +162,7 @@ namespace Boxx {
 	}
 
 	template <class T>
-	inline UInt Collection<T>::Size() const {
+	inline UInt Collection<T>::Count() const {
 		return list->size;
 	}
 
@@ -186,7 +186,7 @@ namespace Boxx {
 
 	template <class T>
 	inline void Collection<T>::Remove(const T& value) {
-		for (UInt i = 0; i < Size(); i++) {
+		for (UInt i = 0; i < Count(); i++) {
 			if (list->list[i] == value) {
 				RemoveAt(i);
 				break;
@@ -196,7 +196,7 @@ namespace Boxx {
 
 	template <class T>
 	inline void Collection<T>::RemoveAll(const T& value) {
-		for (UInt i = 0; i < Size(); i++) {
+		for (UInt i = 0; i < Count(); i++) {
 			if (list->list[i] == value) {
 				RemoveAt(i);
 				i--;
@@ -221,7 +221,7 @@ namespace Boxx {
 
 	template <class T>
 	inline Optional<UInt> Collection<T>::Find(const T& value) const {
-		for (UInt i = 0; i < Size(); i++)
+		for (UInt i = 0; i < Count(); i++)
 			if (list->list[i] == value)
 				return i;
 
@@ -230,15 +230,15 @@ namespace Boxx {
 
 	template <class T>
 	inline bool Collection<T>::Contains(const T& value) const {
-		for (UInt i = 0; i < Size(); i++) if (list->list[i] == value) return true;
+		for (UInt i = 0; i < Count(); i++) if (list->list[i] == value) return true;
 		return false;
 	}
 
 	template <class T>
 	inline Array<T> Collection<T>::ToArray() const {
-		Array<T> arr = Array<T>(Size());
+		Array<T> arr = Array<T>(Count());
 
-		for (UInt i = 0; i < Size(); i++) {
+		for (UInt i = 0; i < Count(); i++) {
 			arr[i] = (*this)[i];
 		}
 
@@ -247,14 +247,14 @@ namespace Boxx {
 
 	template <class T>
 	inline Collection<T> Collection<T>::Copy() const {
-		Collection<T> collection{Size()};
-		collection.list->size = Size();
+		Collection<T> collection{Count()};
+		collection.list->size = Count();
 
-		T* const last = &collection.list->list[Size()];
+		T* const last = &collection.list->list[Count()];
 		T* source = list->list;
 
 		if (std::is_trivially_copyable<T>::value)
-			memmove(collection.list->list, list->list, sizeof(T) * Size());
+			memmove(collection.list->list, list->list, sizeof(T) * Count());
 		else for (T* dest = collection.list->list; dest != last; dest++, source++)
 			*dest = *source;
 
@@ -329,7 +329,7 @@ namespace Boxx {
 		T* const newCollection = new T[newCapacity];
 
 		if (std::is_trivially_copyable<T>::value)
-			memcpy(newCollection, list->list, sizeof(T) * Size());
+			memcpy(newCollection, list->list, sizeof(T) * Count());
 		else for (UInt i = 0; i < list->size; i++)
 			newCollection[i] = std::move(list->list[i]);
 

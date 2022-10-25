@@ -39,13 +39,13 @@ namespace Boxx {
 
 		///[Heading] Methods
 
-		/// Returns the current size of the list.
-		UInt Size() const;
+		/// Returns the current item count of the list.
+		UInt Count() const;
 
 		/// Returns the current capacity of the list.
 		UInt Capacity() const;
 
-		///T Is Empty
+		///[Title] Is Empty
 		/// Checks if the list is empty
 		bool IsEmpty() const;
 
@@ -184,7 +184,7 @@ namespace Boxx {
 	}
 
 	template <class T>
-	inline UInt List<T>::Size() const {
+	inline UInt List<T>::Count() const {
 		return list->size;
 	}
 
@@ -208,15 +208,15 @@ namespace Boxx {
 
 	template <class T>
 	inline void List<T>::Insert(const UInt index, const T& value) {
-		if (Size() >= Capacity())
+		if (Count() >= Capacity())
 			Grow();
 
-		T* dest = &list->list[Size()];
+		T* dest = &list->list[Count()];
 		T* const first = &list->list[index];
-		T* last = &list->list[Size() - 1];
+		T* last = &list->list[Count() - 1];
 
 		if (std::is_trivially_copyable<T>::value)
-			memmove(first + 1, first, sizeof(T) * (Size() - index));
+			memmove(first + 1, first, sizeof(T) * (Count() - index));
 		else for (; dest != first; --dest, --last)
 			*dest = std::move(*last);
 
@@ -226,7 +226,7 @@ namespace Boxx {
 
 	template <class T>
 	inline void List<T>::Remove(const T& value) {
-		for (UInt i = 0; i < Size(); i++) {
+		for (UInt i = 0; i < Count(); i++) {
 			if (list->list[i] == value) {
 				RemoveAt(i);
 				break;
@@ -236,7 +236,7 @@ namespace Boxx {
 
 	template <class T>
 	inline void List<T>::RemoveAll(const T& value) {
-		for (UInt i = 0; i < Size(); i++) {
+		for (UInt i = 0; i < Count(); i++) {
 			if (list->list[i] == value) {
 				RemoveAt(i);
 				i--;
@@ -248,10 +248,10 @@ namespace Boxx {
 	inline void List<T>::RemoveAt(const UInt index, const UInt numElements) {
 		T* dest = &list->list[index];
 		T* first = &list->list[index + numElements];
-		T* const last = &list->list[Size() - numElements];
+		T* const last = &list->list[Count() - numElements];
 
 		if (std::is_trivially_copyable<T>::value)
-			memmove(dest, first, sizeof(T) * (Size() - index - numElements));
+			memmove(dest, first, sizeof(T) * (Count() - index - numElements));
 		else for (; dest != last; ++dest, ++first)
 			*dest = std::move(*first);
 
@@ -260,7 +260,7 @@ namespace Boxx {
 
 	template <class T>
 	inline void List<T>::RemoveLast(const UInt pos) {
-		RemoveAt(Size() - 1 - pos);
+		RemoveAt(Count() - 1 - pos);
 	}
 
 	template <class T>
@@ -272,7 +272,7 @@ namespace Boxx {
 
 	template <class T>
 	inline Optional<UInt> List<T>::Find(const T& value) const {
-		for (UInt i = 0; i < Size(); i++)
+		for (UInt i = 0; i < Count(); i++)
 			if (list->list[i] == value)
 				return i;
 
@@ -281,25 +281,25 @@ namespace Boxx {
 
 	template <class T>
 	inline bool List<T>::Contains(const T& value) const {
-		for (UInt i = 0; i < Size(); i++) if (list->list[i] == value) return true;
+		for (UInt i = 0; i < Count(); i++) if (list->list[i] == value) return true;
 		return false;
 	}
 
 	template <class T>
 	inline T& List<T>::Last(const UInt pos) {
-		return list->list[Size() - pos - 1];
+		return list->list[Count() - pos - 1];
 	}
 
 	template <class T>
 	inline const T& List<T>::Last(const UInt pos) const {
-		return list->list[Size() - pos - 1];
+		return list->list[Count() - pos - 1];
 	}
 
 	template <class T>
 	inline Array<T> List<T>::ToArray() const {
-		Array<T> arr = Array<T>(Size());
+		Array<T> arr = Array<T>(Count());
 
-		for (UInt i = 0; i < Size(); i++) {
+		for (UInt i = 0; i < Count(); i++) {
 			arr[i] = (*this)[i];
 		}
 
@@ -308,14 +308,14 @@ namespace Boxx {
 
 	template <class T>
 	inline List<T> List<T>::Copy() const {
-		List<T> lst{Size()};
-		lst.list->size = Size();
+		List<T> lst{Count()};
+		lst.list->size = Count();
 
-		T* const last = &lst.list->list[Size()];
+		T* const last = &lst.list->list[Count()];
 		T* source = list->list;
 
 		if (std::is_trivially_copyable<T>::value)
-			memmove(lst.list->list, list->list, sizeof(T) * Size());
+			memmove(lst.list->list, list->list, sizeof(T) * Count());
 		else for (T* dest = lst.list->list; dest != last; dest++, source++)
 			*dest = *source;
 
@@ -391,7 +391,7 @@ namespace Boxx {
 		T* const newList = new T[newCapacity];
 
 		if (std::is_trivially_copyable<T>::value)
-			memcpy(newList, list->list, sizeof(T) * Size());
+			memcpy(newList, list->list, sizeof(T) * Count());
 		else for (UInt i = 0; i < list->size; i++)
 			newList[i] = std::move(list->list[i]);
 
