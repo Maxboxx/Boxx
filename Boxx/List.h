@@ -378,6 +378,9 @@ namespace Boxx {
 		}
 	}
 
+	#pragma warning(push)
+	#pragma warning(disable:6385)
+
 	template <class T>
 	inline void List<T>::Grow() {
 		int grow = list->capacity >> 1;
@@ -400,6 +403,8 @@ namespace Boxx {
 		list->list = newList;
 		list->capacity = newCapacity;
 	}
+
+	#pragma warning(pop)
 
 	template <class T>
 	inline T* List<T>::begin() {

@@ -34,7 +34,7 @@ namespace Boxx {
 		StaticArray(const Array<T>& arr);
 
 		StaticArray(const StaticArray<T, S>& arr);
-		StaticArray(StaticArray<T, S>&& arr);
+		StaticArray(StaticArray<T, S>&& arr) noexcept;
 		~StaticArray();
 
 		///[Heading] Methods
@@ -65,7 +65,7 @@ namespace Boxx {
 		void operator=(T* const arr);
 
 		void operator=(const StaticArray<T, S>& arr);
-		void operator=(StaticArray<T, S>&& arr);
+		void operator=(StaticArray<T, S>&& arr) noexcept;
 
 		/// Checks if two arrays have the same array pointer.
 		bool operator==(T* const arr) const;
@@ -170,7 +170,7 @@ namespace Boxx {
 	}
 
 	template <class T, UInt S>
-	inline StaticArray<T, S>::StaticArray(StaticArray<T, S>&& arr)  {
+	inline StaticArray<T, S>::StaticArray(StaticArray<T, S>&& arr) noexcept {
 		array = arr.array;
 		ref = arr.ref;
 		arr.array = nullptr;
@@ -246,7 +246,7 @@ namespace Boxx {
 	}
 
 	template <class T, UInt S>
-	inline void StaticArray<T, S>::operator=(StaticArray<T, S>&& arr) {
+	inline void StaticArray<T, S>::operator=(StaticArray<T, S>&& arr) noexcept {
 		Cleanup();
 		array = arr.array;
 		ref = arr.ref;

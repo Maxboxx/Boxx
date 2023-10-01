@@ -144,7 +144,7 @@ namespace Boxx {
 		};
 
 		struct CharNode : public RegexNode {
-			char c;
+			char c{};
 
 			virtual const char* Match(const char* str, MatchInfo& info) override;
 		};

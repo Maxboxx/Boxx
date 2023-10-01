@@ -20,7 +20,7 @@ namespace Boxx {
 	struct Token {
 	///M
 		/// The type of the token.
-		T type;
+		T type{};
 
 		/// Contains the matched string for the token.
 		String value;
@@ -29,7 +29,7 @@ namespace Boxx {
 		String rawValue;
 
 		/// The line number for the token.
-		UInt line;
+		UInt line{};
 
 		Token() {}
 
@@ -49,9 +49,9 @@ namespace Boxx {
 	template <class T>
 	struct TokenPattern {
 	///M
-		T type;
+		T type{};
 		Boxx::Regex pattern;
-		bool ignore;
+		bool ignore{};
 
 		TokenPattern() {}
 

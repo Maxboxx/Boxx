@@ -1185,7 +1185,7 @@ value-section {display: block;margin-left: 10px;margin-top: 10px;})");
 		try {
 			file = FileReader(filename);
 		}
-		catch (FileError& e) {
+		catch (FileError&) {
 			return List<DocComment>();
 		}
 
