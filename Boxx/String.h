@@ -557,7 +557,9 @@ namespace Boxx {
 
 	inline Optional<UInt> String::Find(const String& search, const UInt start) const {
 		for (UInt i = start; i < Length(); i++) {
-			if (str[i] == search.str[0] && Length() - i >= search.Length()) {
+			if (Length() - i < search.Length()) return nullptr;
+
+			if (str[i] == search.str[0]) {
 				bool found = true;
 
 				for (UInt u = 1; u < search.Length(); u++) {
@@ -570,9 +572,6 @@ namespace Boxx {
 				if (found) {
 					return i;
 				}
-			}
-			else {
-				return nullptr;
 			}
 		}
 

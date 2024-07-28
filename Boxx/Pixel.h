@@ -668,7 +668,7 @@ namespace Boxx {
 				currentColor.id = colorIDs[i];
 
 				for (i++; i < colorIDs.Length(); i++) {
-					if (currentColor.count > 0 && colorIDs[i] == currentColor.id) {
+					if (currentColor.count > 0 && currentColor.count < maxRepeat && colorIDs[i] == currentColor.id) {
 						currentColor.count++;
 
 						if (currentColor.id == backID) {
@@ -680,10 +680,10 @@ namespace Boxx {
 							backCount = 0;
 						}
 
-						if (currentColor.count == maxRepeat) {
+						if (currentColor.count >= maxRepeat) {
 							repeatColors.Add(currentColor);
 
-							if (repeatColors.Count() == maxColors) break;
+							if (repeatColors.Count() >= maxColors) break;
 
 							currentColor.count = 0;
 						}
@@ -692,7 +692,7 @@ namespace Boxx {
 						if (currentColor.count > 0)
 							repeatColors.Add(currentColor);
 
-						if (repeatColors.Count() == maxColors) break;
+						if (repeatColors.Count() >= maxColors) break;
 
 						currentColor.count = 1;
 						currentColor.id = colorIDs[i];

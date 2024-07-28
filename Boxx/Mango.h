@@ -52,6 +52,33 @@ namespace Boxx {
 	/// Typedef for Mango map.
 	typedef Map<String, Mango> MangoMap;
 
+	///[Title] MangoEncodeFlags
+	/// Encode flags for mango data.
+	enum class MangoEncodeFlags : UByte {
+		/// No flags.
+		None = 0,
+
+		/// Creates a pretty string.
+		Pretty = 1,
+
+		/// Separates values with commas.
+		Commas = 2,
+
+		/// Always surround keys and labels with quotes.
+		Quotes = 4,
+
+		/// Use the null keyword instead of nil.
+		Null = 8,
+
+		/// Ignores labels.
+		IgnoreLabels = 16,
+
+		/// Encodes as json
+		Json = Commas | Quotes | Null | IgnoreLabels
+	};
+
+	BOXX_ENUM_FLAGS(MangoEncodeFlags);
+
 	///[Title] Mango
 	/// A mango data structure used for mango data.
 	///[Block] Mango
@@ -81,6 +108,9 @@ namespace Boxx {
 		Mango(const double number);
 
 		/// Creates a mango string value.
+		Mango(const char* const string);
+
+		/// Creates a mango string value.
 		Mango(const String& string);
 
 		/// Creates a mango list value.
@@ -106,6 +136,9 @@ namespace Boxx {
 
 		/// Creates a labeled mango number.
 		Mango(const String& label, const double number);
+
+		/// Creates a labeled mango string.
+		Mango(const String& label, const char* const string);
 
 		/// Creates a labeled mango string.
 		Mango(const String& label, const String& string);
@@ -221,6 +254,10 @@ namespace Boxx {
 
 		/// Assigns a string to the mango value.
 		/// The mango type is changed to string.
+		void operator=(const char* const string);
+
+		/// Assigns a string to the mango value.
+		/// The mango type is changed to string.
 		void operator=(const String& string);
 
 		/// Assigns a list to the mango value.
@@ -243,21 +280,26 @@ namespace Boxx {
 		///[Heading] Static functions
 
 		/// Encodes the mango value to a string.
-		///[Arg] pretty: Creates a pretty string if {true}.
-		static String Encode(const Mango& mango, const bool pretty = false);
+		///[Arg] flags: The encode flags.
+		static String Encode(const Mango& mango, const MangoEncodeFlags flags = MangoEncodeFlags::None);
 
 		/// Decodes a string to a mango value.
 		///[Error] MangoDecodeError: Thrown if the mango string can not be decoded.
 		static Mango Decode(const String& mango);
 
+		/// Decodes a string to a mango value.
+		///[Arg] variables: The initial variables to use.
+		///[Error] MangoDecodeError: Thrown if the mango string can not be decoded.
+		static Mango Decode(const String& mango, const MangoMap& variables);
+
 	private:
-		static String EncodeNode(const Mango& mango);
-		static String EncodeNode(const Mango& mango, const String& tabs);
+		static String EncodeNode(const Mango& mango, const Int indent, const MangoEncodeFlags flags);
 
 		enum class InternalType : UByte {
 			Default,
 			Integer,
-			Var
+			Var,
+			PlaceholderString
 		};
 
 		MangoType type;
@@ -298,7 +340,7 @@ namespace Boxx {
 			ParsingInfo Copy() const;
 		};
 
-		static Mango Parse(TokenList<TokenType>& tokens);
+		static Mango Parse(TokenList<TokenType>& tokens, const MangoMap& variables);
 
 		static Optional<Mango> ParseNil(TokenList<TokenType>& tokens, ParsingInfo& info);
 		static Optional<Mango> ParseBoolean(TokenList<TokenType>& tokens, ParsingInfo& info);
@@ -433,6 +475,11 @@ namespace Boxx {
 		this->number = number;
 	}
 
+	inline Mango::Mango(const char* const string) {
+		type = MangoType::String;
+		this->string = string;
+	}
+
 	inline Mango::Mango(const String& string) {
 		type = MangoType::String;
 		this->string = string;
@@ -487,6 +534,12 @@ namespace Boxx {
 		this->label = label;
 	}
 
+	inline Mango::Mango(const String& label, const char* const string) {
+		type = MangoType::String;
+		this->string = string;
+		this->label = label;
+	}
+
 	inline Mango::Mango(const String& label, const String& string) {
 		type = MangoType::String;
 		this->string = string;
@@ -514,9 +567,18 @@ namespace Boxx {
 			case MangoType::Nil: break;
 			case MangoType::Boolean: boolean = mango.boolean; break;
 			case MangoType::Number: number = mango.number;  break;
-			case MangoType::String: string = mango.string; break;
 			case MangoType::List: list = mango.list; break;
 			case MangoType::Map: map = mango.map; break;
+
+			case MangoType::String: {
+				string = mango.string;
+
+				if (internalType == InternalType::PlaceholderString) {
+					list = mango.list;
+				}
+
+				break;
+			}
 		}
 	}
 
@@ -529,9 +591,18 @@ namespace Boxx {
 			case MangoType::Nil: break;
 			case MangoType::Boolean: boolean = mango.boolean; break;
 			case MangoType::Number: number = mango.number; break;
-			case MangoType::String: string = std::move(mango.string); break;
 			case MangoType::List: list = std::move(mango.list); break;
 			case MangoType::Map: map = std::move(mango.map); break;
+
+			case MangoType::String: {
+				string = std::move(mango.string);
+
+				if (internalType == InternalType::PlaceholderString) {
+					list = std::move(mango.list);
+				}
+
+				break;
+			}
 		}
 	}
 
@@ -595,6 +666,11 @@ namespace Boxx {
 			case MangoType::String: {
 				Mango m = Mango(label, string);
 				m.internalType = internalType;
+
+				if (internalType == InternalType::PlaceholderString) {
+					m.list = list;
+				}
+
 				return m;
 			}
 
@@ -749,6 +825,11 @@ namespace Boxx {
 		this->number = number;
 	}
 
+	inline void Mango::operator=(const char* const string) {
+		type = MangoType::String;
+		this->string = string;
+	}
+
 	inline void Mango::operator=(const String& string) {
 		type = MangoType::String;
 		this->string = string;
@@ -773,9 +854,18 @@ namespace Boxx {
 			case MangoType::Nil: break;
 			case MangoType::Boolean: boolean = mango.boolean; break;
 			case MangoType::Number: number = mango.number; break;
-			case MangoType::String: string = mango.string; break;
 			case MangoType::List: list = mango.list; break;
 			case MangoType::Map: map = mango.map; break;
+
+			case MangoType::String: {
+				string = mango.string;
+
+				if (internalType == InternalType::PlaceholderString) {
+					list = mango.list;
+				}
+
+				break;
+			}
 		}
 	}
 
@@ -788,9 +878,18 @@ namespace Boxx {
 			case MangoType::Nil: break;
 			case MangoType::Boolean: boolean = mango.boolean; break;
 			case MangoType::Number: number = mango.number; break;
-			case MangoType::String: string = std::move(mango.string); break;
 			case MangoType::List: list = std::move(mango.list); break;
 			case MangoType::Map: map = std::move(mango.map); break;
+
+			case MangoType::String: {
+				string = std::move(mango.string);
+
+				if (internalType == InternalType::PlaceholderString) {
+					list = std::move(mango.list);
+				}
+
+				break;
+			}
 		}
 	}
 	
@@ -811,28 +910,34 @@ namespace Boxx {
 		return !operator==(mango);
 	}
 
-	inline String Mango::Encode(const Mango& mango, const bool pretty) {
-		if (pretty)
-			return EncodeNode(mango, "");
+	inline String Mango::Encode(const Mango& mango, const MangoEncodeFlags flags) {
+		if ((flags & MangoEncodeFlags::Pretty) != MangoEncodeFlags::None)
+			return EncodeNode(mango, 0, flags);
 		else
-			return EncodeNode(mango);
+			return EncodeNode(mango, -1, flags);
 	}
 
-	inline String Mango::EncodeNode(const Mango& mango) {
+	inline String Mango::EncodeNode(const Mango& mango, const Int indent, const MangoEncodeFlags flags) {
 		static Regex labelPattern = Regex("^%w+$");
 
+		const bool pretty = (flags & MangoEncodeFlags::Pretty) != MangoEncodeFlags::None;
+		const bool commas = (flags & MangoEncodeFlags::Commas) != MangoEncodeFlags::None;
+
+		const Int nextIndent  = indent >= 0 ? indent + 1 : -1;
+		const String tabs     = indent >= 0 ? String('\t').Repeat(indent) : String("");
+		const String nextTabs = nextIndent >= 0 ? String('\t').Repeat(nextIndent) : String("");
 		String str = "";
 
-		if (mango.label.Length() > 0) {
-			if (labelPattern.Match(mango.label))
-				str += mango.label + ":";
+		if (mango.label.Length() > 0 && (flags & MangoEncodeFlags::IgnoreLabels) == MangoEncodeFlags::None) {
+			if ((flags & MangoEncodeFlags::Quotes) == MangoEncodeFlags::None && labelPattern.Match(mango.label))
+				str += mango.label + (pretty ? ": " : ":");
 			else
-				str += "\"" + mango.label.Escape() + "\":";
+				str += "\"" + mango.label.Escape() + (pretty ? "\": " : "\":");
 		}
 
 		switch (mango.type) {
 			case MangoType::Nil: {
-				str += "nil";
+				str += (flags & MangoEncodeFlags::Null) == MangoEncodeFlags::None ? "nil" : "null";
 				break;
 			}
 			case MangoType::Boolean: {
@@ -851,93 +956,60 @@ namespace Boxx {
 				break;
 			}
 			case MangoType::List: {
-				str += "[";
+				str += pretty ? "[\n" : "[";
 
-				for (const Mango& m : mango.list)
-					str += EncodeNode(m) + " ";
+				for (UInt i = 0; i < mango.list.Count(); i++) {
+					str += nextTabs + EncodeNode(mango.list[i], nextIndent, flags);
 
-				str = str.Sub(0, str.Length() - 2) + "]";
-				break;
-			}
-			case MangoType::Map: {
-				str += "{";
+					if (i < mango.list.Count() - 1) {
+						if (commas) {
+							str += ",";
+						}
+						else if (!pretty) {
+							str += " ";
+						}
+					}
 
-				for (const Pair<String, Mango>& m : mango.map) {
-					if (labelPattern.Match(m.key))
-						str += m.key + ":";
-					else
-						str += "\"" + m.key.Escape() + "\":";
-
-					str += EncodeNode(m.value) + " ";
+					if (pretty) str += "\n";
 				}
-
-				str = str.Sub(0, str.Length() - 2) + "}";
-				break;
-			}
-		}
-
-		return str;
-	}
-
-	inline String Mango::EncodeNode(const Mango& mango, const String& tabs) {
-		static Regex labelPattern = Regex("^%w+$");
-
-		const String nextTabs = tabs + "\t";
-		String str = "";
-
-		if (mango.label.Length() > 0) {
-			if (labelPattern.Match(mango.label))
-				str += mango.label + ": ";
-			else
-				str += "\"" + mango.label.Escape() + "\": ";
-		}
-
-		switch (mango.type) {
-			case MangoType::Nil: {
-				str += "nil";
-				break;
-			}
-			case MangoType::Boolean: {
-				str += mango.boolean ? "true" : "false";
-				break;
-			}
-			case MangoType::Number: {
-				if (mango.internalType == InternalType::Integer)
-					str += String::ToString((Long)mango.number);
-				else
-					str += String::ToString(mango.number);
-				break;
-			}
-			case MangoType::String: {
-				str += "\"" + mango.string.Escape() + "\"";
-				break;
-			}
-			case MangoType::List: {
-				str += "[\n";
-
-				for (const Mango& m : mango.list)
-					str += nextTabs + EncodeNode(m, nextTabs);
 
 				str += tabs + "]";
 				break;
 			}
 			case MangoType::Map: {
-				str += "{\n";
+				str += pretty ? "{\n" : "{";
+
+				List<Pair<String, Mango>> pairs = List<Pair<String, Mango>>(mango.map.Count());
 
 				for (const Pair<String, Mango>& m : mango.map) {
-					if (labelPattern.Match(m.key))
-						str += nextTabs + m.key;
-					else
-						str += nextTabs + "\"" + m.key.Escape() + "\"";
+					pairs.Add(m);
+				}
 
-					if (m.value.label.Length() == 0) {
-						str += ": ";
+				for (UInt i = 0; i < pairs.Count(); i++) {
+					if ((flags & MangoEncodeFlags::Quotes) == MangoEncodeFlags::None && labelPattern.Match(pairs[i].key))
+						str += nextTabs + pairs[i].key;
+					else
+						str += nextTabs + "\"" + pairs[i].key.Escape() + "\"";
+
+					if (pairs[i].value.label.Length() == 0 || (flags & MangoEncodeFlags::IgnoreLabels) != MangoEncodeFlags::None) {
+						str += pretty ? ": " : ":";
 					}
 					else {
 						str += " ";
 					}
 
-					str += EncodeNode(m.value, nextTabs);
+					str += EncodeNode(pairs[i].value, nextIndent, flags);
+
+					if (i < pairs.Count() - 1) {
+						if (commas) {
+							str += ",";
+						}
+						else if (!pretty) {
+							str += " ";
+						}
+					}
+
+					if (pretty) str += "\n";
 				}
 
 				str += tabs + "}";
@@ -945,10 +1017,14 @@ namespace Boxx {
 			}
 		}
 
-		return str + "\n";
+		return str;
 	}
 
 	inline Mango Mango::Decode(const String& mango) {
+		return Decode(mango, MangoMap());
+	}
+
+	inline Mango Mango::Decode(const String& mango, const MangoMap& variables) {
 		List<TokenPattern<TokenType>> patterns;
 		patterns.Add(TokenPattern<TokenType>(TokenType::Comment, "%-%-#{%/+}~{%0%-}*%0%-%-", true, true));
 		patterns.Add(TokenPattern<TokenType>(TokenType::Comment, "%-%-~\n*", true, true));
@@ -975,7 +1051,7 @@ namespace Boxx {
 
 		try {
 			TokenList<TokenType> tokens = Lexer::Lex(patterns, mango);
-			return Parse(tokens);
+			return Parse(tokens, variables);
 		}
 		catch (MangoDecodeError& e) {
 			throw e;
@@ -988,10 +1064,11 @@ namespace Boxx {
 		}
 	}
 
-	inline Mango Mango::Parse(TokenList<TokenType>& tokens) {
+	inline Mango Mango::Parse(TokenList<TokenType>& tokens, const MangoMap& variables) {
 		UInt index = 0;
 
 		ParsingInfo info;
+		info.variables = variables;
 
 		Optional<Mango> mango = ParseLabeledValue(tokens, info);
 
@@ -1033,8 +1110,53 @@ namespace Boxx {
 	}
 
 	inline Optional<Mango> Mango::ParseString(TokenList<TokenType>& tokens, ParsingInfo& info) {
+		static Regex placeholderPattern = Regex("^(~\\*){\\%{%s*%$(%w+)%s*%}(~\\*)}+$");
+
 		if (Optional<String> str = ParseRawString(tokens, info)) {
-			return Mango(*str);
+			String s = *str;
+
+			if (Optional<Match> match = placeholderPattern.Match(s)) {
+				MangoList list;
+				s = match->groups[0];
+				list.Add(match->groups[0]);
+
+				UInt len = match->groups.Count() / 2;
+
+				for (UInt i = 0; i < len; i++) {
+					Mango m;
+
+					if (info.variables.Contains(match->groups[i * 2 + 1], m)) {
+						if (m.type == MangoType::String) {
+							s += m.string;
+						}
+						else {
+							s += Encode(m);
+						}
+
+						list.Add(m.Copy());
+					}
+					else {
+						s += Encode(Mango(MangoType::Nil));
+
+						Mango var = Mango(match->groups[i * 2 + 1]);
+						var.internalType = InternalType::Var;
+						list.Add(var);
+					}
+
+					s += match->groups[i * 2 + 2];
+
+					list.Add(match->groups[i * 2 + 2]);
+				}
+
+				Mango output = Mango(s);
+				output.internalType = InternalType::PlaceholderString;
+				output.list = list;
+
+				return output;
+			}
+			else {
+				return Mango(s);
+			}
 		}
 
 		return nullptr;
@@ -1120,18 +1242,52 @@ namespace Boxx {
 			}
 
 			case MangoType::String: {
-				if (mango.internalType != InternalType::Var) break;
+				switch (mango.internalType) {
+					case InternalType::Var: {
+						Mango var;
 
-				Mango var;
+						if (vars.Contains(mango.string, var)) {
+							mango = var.Copy();
+						}
+						else {
+							mango = Mango(MangoType::Nil);
+						}
 
-				if (vars.Contains(mango.string, var)) {
-					mango = var.Copy();
+						break;
+					}
+
+					case InternalType::PlaceholderString: {
+						String s = mango.list[0].string;
+
+						MangoList list;
+						list.Add(s);
+
+						UInt len = mango.list.Count() / 2;
+
+						for (UInt i = 0; i < len; i++) {
+							Mango value = mango.list[i * 2 + 1].Copy();
+							InsertTemplateValues(value, vars);
+							
+							if (value.type == MangoType::String) {
+								s += value.string;
+								list.Add(value);
+							}
+							else {
+								String str = Encode(value);
+								s += str;
+								list.Add(str);
+							}
+
+							s += mango.list[i * 2 + 2].string;
+							list.Add(mango.list[i * 2 + 2].string);
+						}
+
+						mango = Mango(s);
+						mango.internalType = InternalType::PlaceholderString;
+						mango.list = list;
+						break;
+					}
 				}
-				else {
-					mango = Mango(MangoType::Nil);
-				}
-
-				break;
 			}
 		}
 	}
@@ -1242,7 +1398,7 @@ namespace Boxx {
 	inline Optional<String> Mango::ParseRawString(TokenList<TokenType>& tokens, ParsingInfo& info) {
 		if (tokens.Current().type == TokenType::String) {
 			tokens.Advance();
-			return tokens.PeekPrevious().value;
+			return tokens.PeekPrevious().value.Replace("\\\\", "\\").Replace("\\\"", "\"");
 		}
 
 		return nullptr;

@@ -116,6 +116,7 @@ namespace Boxx {
 	inline String Path::GetDirectory(const String& path) {
 		for (Int i = path.Length(); i >= 0; i--) {
 			if (IsSeparator(path[i])) {
+				if (i == 0) return "";
 				return path.Sub(0, i - 1);
 			}
 		}
@@ -130,30 +131,20 @@ namespace Boxx {
 			}
 		}
 
-		return "";
+		return path;
 	}
 
 	inline String Path::GetFileName(const String& path) {
-		Int extSepIndex = -1;
+		String file = GetFile(path);
 
-		for (Int i = path.Length(); i >= 0; i--) {
-			char c = path[i];
-
-			if (IsSeparator(c)) {
-				if (extSepIndex >= 0) {
-					return path.Sub(i + 1, extSepIndex - 1);
-				}
-				else {
-					return path.Sub(i + 1);
-				}
-			}
-
-			if (extSepIndex < 0 && IsExtSeparator(c)) {
-				extSepIndex = i;
+		for (UInt i = 0; i < file.Length(); i++) {
+			if (IsExtSeparator(file[i])) {
+				if (i == 0) return "";
+				return file.Sub(0, i - 1);
 			}
 		}
 
-		return "";
+		return file;
 	}
 
 	inline String Path::GetExtension(const String& path) {
