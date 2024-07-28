@@ -27,7 +27,7 @@ namespace Boxx {
 		explicit Stack(const UInt capacity);
 
 		Stack(const Stack<T>& stack);
-		Stack(Stack<T>&& stack);
+		Stack(Stack<T>&& stack) noexcept;
 		~Stack();
 
 		///[Heading] Methods
@@ -62,7 +62,7 @@ namespace Boxx {
 		///[Heading] Operators
 
 		void operator=(const Stack<T>& stack);
-		void operator=(Stack<T>&& stack);
+		void operator=(Stack<T>&& stack) noexcept;
 
 		/// Checks if two stacks are the same.
 		bool operator==(const Stack<T>& stack) const;
@@ -90,7 +90,7 @@ namespace Boxx {
 	}
 
 	template <class T>
-	inline Stack<T>::Stack(Stack<T>&& stack) {
+	inline Stack<T>::Stack(Stack<T>&& stack) noexcept {
 		this->stack = std::move(stack.stack);
 	}
 
@@ -154,7 +154,7 @@ namespace Boxx {
 	}
 
 	template <class T>
-	inline void Stack<T>::operator=(Stack<T>&& stack) {
+	inline void Stack<T>::operator=(Stack<T>&& stack) noexcept {
 		this->stack = std::move(stack.stack);
 	}
 

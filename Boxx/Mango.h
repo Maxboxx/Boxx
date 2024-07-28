@@ -1056,7 +1056,7 @@ namespace Boxx {
 		catch (MangoDecodeError& e) {
 			throw e;
 		}
-		catch (TokenListError& e) {
+		catch (TokenListError&) {
 			throw MangoDecodeError("Unexpected end of string");
 		}
 		catch (LexerError& e) {
