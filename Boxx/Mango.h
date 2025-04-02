@@ -25,6 +25,9 @@ namespace Boxx {
 	/// Enum of all types of mango values.
 	///[Block] MangoType
 	enum class MangoType : UByte {
+		/// None type.
+		None,
+
 		/// Nil type.
 		Nil,
 
@@ -342,6 +345,7 @@ namespace Boxx {
 
 		static Mango Parse(TokenList<TokenType>& tokens, const MangoMap& variables);
 
+		static Optional<Mango> ParseNone(TokenList<TokenType>& tokens, ParsingInfo& info);
 		static Optional<Mango> ParseNil(TokenList<TokenType>& tokens, ParsingInfo& info);
 		static Optional<Mango> ParseBoolean(TokenList<TokenType>& tokens, ParsingInfo& info);
 		static Optional<Mango> ParseNumber(TokenList<TokenType>& tokens, ParsingInfo& info);
@@ -439,7 +443,7 @@ namespace Boxx {
 	};
 
 	inline Mango::Mango() {
-		type = MangoType::Nil;
+		type = MangoType::None;
 	}
 
 	inline Mango::Mango(const MangoType type) {
@@ -564,6 +568,7 @@ namespace Boxx {
 		internalType = mango.internalType;
 
 		switch (type) {
+			case MangoType::None: break;
 			case MangoType::Nil: break;
 			case MangoType::Boolean: boolean = mango.boolean; break;
 			case MangoType::Number: number = mango.number;  break;
@@ -589,6 +594,7 @@ namespace Boxx {
 
 		switch (type) {
 			case MangoType::Nil: break;
+			case MangoType::None: break;
 			case MangoType::Boolean: boolean = mango.boolean; break;
 			case MangoType::Number: number = mango.number; break;
 			case MangoType::List: list = std::move(mango.list); break;
@@ -645,8 +651,9 @@ namespace Boxx {
 
 	inline Mango Mango::Copy() const {
 		switch (type) {
+			case MangoType::None:
 			case MangoType::Nil: {
-				Mango m = Mango(label, MangoType::Nil);
+				Mango m = Mango(label, type);
 				m.internalType = internalType;
 				return m;
 			}
@@ -699,7 +706,7 @@ namespace Boxx {
 			}
 		}
 
-		return Mango(MangoType::Nil);
+		return Mango(MangoType::None);
 	}
 
 	inline Mango::operator bool() const {
@@ -770,7 +777,7 @@ namespace Boxx {
 			return map[key];
 		}
 		catch (MapKeyError) {
-			throw MangoKeyError("Key '" + key + "' not found");
+			return Mango(MangoType::None);
 		}
 	}
 
@@ -792,7 +799,7 @@ namespace Boxx {
 			return map[key];
 		}
 		catch (MapKeyError) {
-			throw MangoKeyError("Key '" + String(key) + "' not found");
+			return Mango(MangoType::None);
 		}
 	}
 
@@ -851,6 +858,7 @@ namespace Boxx {
 		internalType = mango.internalType;
 
 		switch (type) {
+			case MangoType::None: break;
 			case MangoType::Nil: break;
 			case MangoType::Boolean: boolean = mango.boolean; break;
 			case MangoType::Number: number = mango.number; break;
@@ -875,6 +883,7 @@ namespace Boxx {
 		internalType = mango.internalType;
 
 		switch (type) {
+			case MangoType::None: break;
 			case MangoType::Nil: break;
 			case MangoType::Boolean: boolean = mango.boolean; break;
 			case MangoType::Number: number = mango.number; break;
@@ -897,6 +906,7 @@ namespace Boxx {
 		if (type != mango.type) return false;
 
 		switch (type) {
+			case MangoType::None: return true;
 			case MangoType::Nil: return true;
 			case MangoType::Boolean: return boolean == mango.boolean;
 			case MangoType::Number: return number == mango.number;
@@ -936,6 +946,10 @@ namespace Boxx {
 		}
 
 		switch (mango.type) {
+			case MangoType::None: {
+				str += "none";
+				break;
+			}
 			case MangoType::Nil: {
 				str += (flags & MangoEncodeFlags::Null) == MangoEncodeFlags::None ? "nil" : "null";
 				break;
@@ -958,10 +972,17 @@ namespace Boxx {
 			case MangoType::List: {
 				str += pretty ? "[\n" : "[";
 
-				for (UInt i = 0; i < mango.list.Count(); i++) {
-					str += nextTabs + EncodeNode(mango.list[i], nextIndent, flags);
+				bool first = true;
 
-					if (i < mango.list.Count() - 1) {
+				for (UInt i = 0; i < mango.list.Count(); i++) {
+					if (mango.list[i].type == MangoType::None) continue;
+
+					str += nextTabs;
+
+					if (first) {
+						first = false;
+					}
+					else {
 						if (commas) {
 							str += ",";
 						}
@@ -969,6 +990,8 @@ namespace Boxx {
 							str += " ";
 						}
 					}
+
+					str += EncodeNode(mango.list[i], nextIndent, flags);
 
 					if (pretty) str += "\n";
 				}
@@ -982,6 +1005,7 @@ namespace Boxx {
 				List<Pair<String, Mango>> pairs = List<Pair<String, Mango>>(mango.map.Count());
 
 				for (const Pair<String, Mango>& m : mango.map) {
+					if (m.value.type == MangoType::None) continue;
 					pairs.Add(m);
 				}
 
@@ -1030,6 +1054,7 @@ namespace Boxx {
 		patterns.Add(TokenPattern<TokenType>(TokenType::Comment, "%-%-~\n*", true, true));
 
 		patterns.Add(TokenPattern<TokenType>(TokenType::Boolean, "true|false"));
+		patterns.Add(TokenPattern<TokenType>(TokenType::None, "none"));
 		patterns.Add(TokenPattern<TokenType>(TokenType::Nil, "nil"));
 		patterns.Add(TokenPattern<TokenType>(TokenType::Number, "%d*%.?%d+"));
 		patterns.Add(TokenPattern<TokenType>(TokenType::Name, "%w+"));
@@ -1080,6 +1105,15 @@ namespace Boxx {
 		else {
 			throw MangoDecodeError("Invalid mango value");
 		}
+	}
+
+	inline Optional<Mango> Mango::ParseNone(TokenList<TokenType>& tokens, ParsingInfo& info) {
+		if (tokens.Current().type == TokenType::None) {
+			tokens.Advance();
+			return Mango(MangoType::None);
+		}
+
+		return nullptr;
 	}
 
 	inline Optional<Mango> Mango::ParseNil(TokenList<TokenType>& tokens, ParsingInfo& info) {
@@ -1136,7 +1170,7 @@ namespace Boxx {
 						list.Add(m.Copy());
 					}
 					else {
-						s += Encode(Mango(MangoType::Nil));
+						s += Encode(Mango(MangoType::None));
 
 						Mango var = Mango(match->groups[i * 2 + 1]);
 						var.internalType = InternalType::Var;
@@ -1171,7 +1205,7 @@ namespace Boxx {
 				return m.Copy();
 			}
 			else {
-				return Mango(MangoType::Nil);
+				return Mango(MangoType::None);
 			}
 		}
 
@@ -1204,7 +1238,7 @@ namespace Boxx {
 			Template t;
 
 			if (!info.templates.Contains(name, t)) {
-				return Mango(MangoType::Nil);
+				return Mango(MangoType::None);
 			}
 
 			Map<String, Mango> vars;
@@ -1250,7 +1284,7 @@ namespace Boxx {
 							mango = var.Copy();
 						}
 						else {
-							mango = Mango(MangoType::Nil);
+							mango = Mango(MangoType::None);
 						}
 
 						break;
@@ -1302,6 +1336,33 @@ namespace Boxx {
 			list.Add(*item);
 		}
 
+		while (true) {
+			if (Optional<Mango> item = ParseVariable(tokens, parseInfo, true)) {
+				if (item->type != MangoType::List) {
+					throw MangoDecodeError("List expected for variable unpacking");
+				}
+
+				for (const Mango& item : item->list) {
+					list.Add(item);
+				}
+			}
+			else if (Optional<Mango> item = ParseTemplate(tokens, parseInfo, true)) {
+				if (item->type != MangoType::List) {
+					throw MangoDecodeError("List expected for template unpacking");
+				}
+				
+				for (const Mango& item : item->list) {
+					list.Add(item);
+				}
+			}
+			else if (Optional<Mango> item = ParseLabeledValue(tokens, parseInfo)) {
+				list.Add(*item);
+			}
+			else {
+				break;
+			}
+		}
+
 		return list;
 	}
 
@@ -1347,6 +1408,8 @@ namespace Boxx {
 
 		while (ParseVariableAssignment(tokens, parseInfo, false) || ParseTemplateAssignment(tokens, parseInfo, false));
 
+		Set<String> keys;
+
 		while (true) {
 			if (Optional<Mango> item = ParseVariable(tokens, parseInfo, true)) {
 				if (item->type != MangoType::Map) {
@@ -1367,11 +1430,12 @@ namespace Boxx {
 				}
 			}
 			else if (Optional<Pair<String, Mango>> item = ParseMapItem(tokens, parseInfo)) {
-				if (map.Contains(item->key)) {
+				if (keys.Contains(item->key)) {
 					throw MangoDecodeError("Duplicate map key");
 				}
 
-				map.Add(*item);
+				map.Set(*item);
+				keys.Add(item->key);
 			}
 			else {
 				break;
@@ -1432,6 +1496,7 @@ namespace Boxx {
 
 	inline Optional<Mango> Mango::ParseValue(TokenList<TokenType>& tokens, ParsingInfo& info, const bool allowInnerLabels) {
 		switch (tokens.Current().type) {
+			case TokenType::None:     return ParseNone(tokens, info);
 			case TokenType::Nil:      return ParseNil(tokens, info);
 			case TokenType::Boolean:  return ParseBoolean(tokens, info);
 			case TokenType::Number:   return ParseNumber(tokens, info);

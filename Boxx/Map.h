@@ -52,6 +52,10 @@ namespace Boxx {
 		///p Adds the key if it does not exist.
 		void Set(const Key& key, const Value& value);
 
+		/// Sets the value of the specified key.
+		///p Adds the key if it does not exist.
+		void Set(const Pair<Key, Value>& pair);
+
 		/// Remove a key from the map if it exists.
 		void Remove(const Key& key);
 
@@ -191,6 +195,11 @@ namespace Boxx {
 		else {
 			Add(key, value);
 		}
+	}
+
+	template <class Key, class Value>
+	inline void Map<Key, Value>::Set(const Pair<Key, Value>& pair) {
+		Set(pair.key, pair.value);
 	}
 
 	template <class Key, class Value>

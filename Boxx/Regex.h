@@ -92,6 +92,7 @@ namespace Boxx {
 		static NodeLeaf ParseRawExpression(const Pattern& pattern, UInt& index);
 		static NodeLeaf ParseElement(const Pattern& pattern, UInt& index);
 		static NodeLeaf ParseElementMatch(const Pattern& pattern, UInt& index);
+		static NodeLeaf ParseLiteralString(const Pattern& pattern, UInt& index);
 		static NodeLeaf ParseRawElement(const Pattern& pattern, UInt& index);
 		static Optional<Tuple<UInt, UInt, bool>> ParseQuantifier(const Pattern& pattern, UInt& index);
 		static Node ParseString(const Pattern& pattern, UInt& index);
@@ -180,6 +181,10 @@ namespace Boxx {
 		};
 
 		struct WhiteSpaceNode : public RegexNode {
+			virtual const char* Match(const char* str, MatchInfo& info) override;
+		};
+
+		struct LineBreakNode : public RegexNode {
 			virtual const char* Match(const char* str, MatchInfo& info) override;
 		};
 
@@ -337,6 +342,7 @@ namespace Boxx {
 			static const char element   = '#';
 			static const char expr      = '!';
 			static const char separator = ',';
+			static const char quote     = '\'';
 
 			static const char manyOpt    = '*';
 			static const char many       = '+';
@@ -354,17 +360,18 @@ namespace Boxx {
 			static const char hiddenOpen  = '{';
 			static const char hiddenClose = '}';
 
-			static const char lower    = 'l';
-			static const char upper    = 'u';
-			static const char digit    = 'd';
-			static const char hex      = 'x';
-			static const char alpha    = 'a';
-			static const char alphanum = 'v';
-			static const char word     = 'w';
-			static const char punct    = 'p';
-			static const char space    = 's';
-			static const char white    = 'n';
-			static const char bound    = 'b';
+			static const char lower     = 'l';
+			static const char upper     = 'u';
+			static const char digit     = 'd';
+			static const char hex       = 'x';
+			static const char alpha     = 'a';
+			static const char alphanum  = 'v';
+			static const char word      = 'w';
+			static const char punct     = 'p';
+			static const char space     = 's';
+			static const char white     = 'n';
+			static const char lineBreak = 'r';
+			static const char bound     = 'b';
 
 			static bool IsMetaChar(const char c) {
 				static const Set<char> metaChars = GetMetaChars();
@@ -447,6 +454,7 @@ namespace Boxx {
 				chars.Add(element);
 				chars.Add(expr);
 				chars.Add(separator);
+				chars.Add(quote);
 
 				chars.Add(manyOpt);
 				chars.Add(many);
@@ -499,6 +507,7 @@ namespace Boxx {
 				chars.Add(punct);
 				chars.Add(space);
 				chars.Add(white);
+				chars.Add(lineBreak);
 				chars.Add(bound);
 
 				chars.Add('0');
@@ -840,6 +849,38 @@ namespace Boxx {
 		return NodeLeaf(element, elementEnd);
 	}
 
+	inline Regex::NodeLeaf Regex::ParseLiteralString(const Pattern& pattern, UInt& index) {
+		if (index >= pattern.pattern.Length() || pattern[index] != MetaChar::quote) {
+			return NodeLeaf(nullptr, nullptr);
+		}
+
+		index++;
+
+		UInt ind = index;
+
+		List<char> str;
+
+		while (ind < pattern.pattern.Length()) {
+			if (pattern[ind] == MetaChar::quote) {
+				if (ind + 1 < pattern.pattern.Length() && pattern[ind + 1] == MetaChar::quote) {
+					ind += 2;
+					str.Add(MetaChar::quote);
+					continue;
+				}
+
+				index = ind + 1;
+				Pointer<StringNode> strNode = new StringNode();
+				strNode->string = String(str);
+				return NodeLeaf(strNode, strNode);
+			}
+
+			str.Add(pattern[ind]);
+			ind++;
+		}
+
+		throw RegexPatternError("Literal string must be closed");
+	}
+
 	inline Regex::NodeLeaf Regex::ParseRawElement(const Pattern& pattern, UInt& index) {
 		if (Node range = ParseRange(pattern, index)) {
 			return NodeLeaf(range, range);
@@ -909,6 +950,10 @@ namespace Boxx {
 
 			case MetaChar::element: {
 				return ParseElementMatch(pattern, index);
+			}
+
+			case MetaChar::quote: {
+				return ParseLiteralString(pattern, index);
 			}
 		}
 
@@ -1131,6 +1176,11 @@ namespace Boxx {
 			case MetaChar::white: {
 				index++;
 				return new WhiteSpaceNode();
+			}
+
+			case MetaChar::lineBreak: {
+				index++;
+				return new LineBreakNode();
 			}
 
 			case MetaChar::bound: {
@@ -1491,6 +1541,26 @@ namespace Boxx {
 		}
 
 		if (MetaChar::IsWhiteSpace(*str)) {
+			return next->Match(str + 1, info);
+		}
+
+		return nullptr;
+	}
+
+	inline const char* Regex::LineBreakNode::Match(const char* str, MatchInfo& info) {
+		if (str >= info.end) {
+			return nullptr;
+		}
+
+		if (*str == '\r') {
+			if (str + 1 < info.end && *(str + 1) == '\n') { 
+				return next->Match(str + 2, info);
+			}
+			else {
+				return next->Match(str + 1, info);
+			}
+		}
+		else if (*str == '\n') {
 			return next->Match(str + 1, info);
 		}
 

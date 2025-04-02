@@ -35,6 +35,7 @@
 [Value] %p: Matches a punctuation character
 [Value] %s: Matches a space or a tab
 [Value] %n: Macthes a whitespace character
+[Value] %r: Macthes a line break
 [Value] %b: Matches a word boundary
 [Value] a\:b: Matches any character in the range from {a} to {b}
 [Value] [...]: Custom character set. Matches any character present between {[} and {]}.
@@ -47,3 +48,4 @@
 [Value] $: Matches the end of the string.
 [Value] |: Matches either the expression before or after the {|} character
 [Value] %: Escape character. Treats the next character in the pattern as a literal charater unless it is a predefined character set
+[Value] ': Any sequence of characters sorrounded by {'} will match the exact string of characters between the quotes. Two quotes next to each other {''} inside the string represents the {'} character.
