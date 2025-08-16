@@ -10,6 +10,9 @@
 #include "Pointer.h"
 #include "Stack.h"
 #include "Tuple.h"
+#include "StringBuilder.h"
+
+#include <functional>
 
 ///[Settings] block: indent
 
@@ -49,6 +52,11 @@ namespace Boxx {
 		///[Returns] List<Match>: Contains all matches found in the string.
 		List<Boxx::Match> GlobalMatch(const String& str, UInt pos = 0) const;
 
+		/// Replaces all matches in a string.
+		///[Arg] str: The string to find matches in.
+		///[Arg] replaceFunc: The function to use for replacement.
+		String Replace(const String& str, std::function<String(Boxx::Match)> replaceFunc) const;
+
 		///[Heading] Static functions
 
 		/// Find matches in a string.
@@ -66,6 +74,12 @@ namespace Boxx {
 		///[Error] RegexPatternError: Thrown if the pattern is invalid.
 		///[Returns] List<Match>: Contains all matches found in the string.
 		static List<Boxx::Match> GlobalMatch(const String& pattern, const String& str, UInt pos = 0);
+
+		/// Replaces all matches in a string.
+		///[Arg] pattern: The regex pattern to use.
+		///[Arg] str: The string to find matches in.
+		///[Arg] replaceFunc: The function to use for replacement.
+		static String Replace(const String& pattern, const String& str, std::function<String(Boxx::Match)> replaceFunc);
 
 		/// Escapes meta characters in a string to make the regex engine interpret the string literally.
 		static String Escape(const String& str);
@@ -668,6 +682,27 @@ namespace Boxx {
 		return matches;
 	}
 
+	inline String Regex::Replace(const String& str, std::function<String(Boxx::Match)> replaceFunc) const {
+		StringBuilder output;
+
+		UInt pos = 0;
+
+		while (Optional<Boxx::Match> match = Match(str, pos)) {
+			if (match->index > pos) {
+				output += str.Sub(pos, match->index - 1);
+			}
+
+			output += replaceFunc(*match);
+			pos = match->index + match->length;
+		}
+
+		if (pos < str.Length()) {
+			output += str.Sub(pos);
+		}
+
+		return output.ToString();
+	}
+
 	inline Optional<Match> Regex::Match(const String& pattern, const String& str, const UInt pos) {
 		try {
 			return Regex(pattern).Match(str, pos);
@@ -680,6 +715,15 @@ namespace Boxx {
 	inline List<Match> Regex::GlobalMatch(const String& pattern, const String& str, const UInt pos) {
 		try {
 			return Regex(pattern).GlobalMatch(str, pos);
+		}
+		catch (RegexPatternError e) {
+			throw e;
+		}
+	}
+
+	inline String Regex::Replace(const String& pattern, const String& str, std::function<String(Boxx::Match)> replaceFunc) {
+		try {
+			return Regex(pattern).Replace(str, replaceFunc);
 		}
 		catch (RegexPatternError e) {
 			throw e;
